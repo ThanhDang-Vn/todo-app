@@ -1,3 +1,10 @@
+import { Header } from './components/Header';
+
 export default function home() {
-  return <h1 className='text-3xl font-bold underline items-center'>Welcome home page</h1>;
+  return (
+    <div className='flex justify-between items-center'>
+      <div className='flex items-center'>Hello</div>
+      <div className='flex items-center'>Hello</div>
+    </div>
+  );
 }
