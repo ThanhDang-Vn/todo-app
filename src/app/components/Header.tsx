@@ -5,8 +5,8 @@ import { ModeToggle } from '@/app/components/ModeToggle';
 
 export function Header() {
   return (
-    <header className='bg-background h-12 p-2 border-b sticky top-0 z-20'>
-      <div className='flex items-center justify-between'>
+    <header className='bg-background h-24 p-2  sticky top-0 z-20'>
+      {/* <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <NavButton href='/home' label='Home' icon={LayoutDashboard} variant='ghost' />
 
@@ -24,7 +24,7 @@ export function Header() {
           <ModeToggle />
           <NavButton href='/profile' label='Profile' icon={CircleUserRound} variant='ghost' />
         </div>
-      </div>
+      </div> */}
     </header>
   );
 }
