@@ -24,24 +24,24 @@ const navItems = [
   },
   {
     title: 'Inbox',
-    url: '#',
+    url: '/inbox',
     icon: Inbox,
   },
   {
     title: 'Today',
-    url: '#',
+    url: '/today',
     icon: Calendar,
   },
   {
     title: 'Upcomming',
-    url: '#',
+    url: '/upcoming',
     icon: BookUp,
   },
 ];
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar className='bg-sidebar'>
       <SidebarHeader>
         <NavUser user={userData} />
       </SidebarHeader>
