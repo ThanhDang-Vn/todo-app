@@ -50,7 +50,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem className='ml-3 pb-3'>
             <div className='flex items-center pl-1.4 gap-2'>
-              <CirclePlus fill='red' color='white' size={28} />
+              <CirclePlus fill='red' color='oklch(93.657% 0.00183 249.169)' size={28} />
               <span className='text-sm font-medium'>Add Task</span>
             </div>
           </SidebarMenuItem>
