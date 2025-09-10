@@ -12,7 +12,7 @@ import {
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { DatePicker } from '@/app/components/ui/date-picker';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { Pencil, Copy, Archive, Trash2, Ellipsis } from 'lucide-react';
 
@@ -28,11 +28,11 @@ const getWeekRange = (date: Date) => {
   const endDate = new Date(date);
 
   if (dayOfWeek === 0) {
-    startDate.setDate(date.getDate() - 7);
+    startDate.setDate(date.getDate() - 6);
     endDate.setDate(date.getDate());
   }
 
-  startDate.setDate(date.getDate() - dayOfWeek - 1);
+  startDate.setDate(date.getDate() - dayOfWeek + 1);
 
   endDate.setDate(date.getDate() + 7 - dayOfWeek);
   return { startDate, endDate };
@@ -41,7 +41,15 @@ const getWeekRange = (date: Date) => {
 const dateInRange = (date: string, selectedDate: Date) => {
   const dateConver = new Date(date);
   const { startDate, endDate } = getWeekRange(selectedDate);
+  console.log(startDate.getDay(), endDate.getDay());
   return dateConver.getDate() >= startDate.getDate() && dateConver.getDate() <= endDate.getDate();
+};
+
+const getDayOfWeek = (dateInput: string | Date): string => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  return days[date.getDay()];
 };
 
 const dataTask = [
@@ -62,6 +70,20 @@ const dataTask = [
         description: 'Revise 20 IELTS vocabulary words',
         priority: '1',
         tags: ['vocabulary', 'revision'],
+      },
+      {
+        id: 10,
+        name: 'Writing Task 1',
+        description: 'Write a report about a given chart',
+        priority: '3',
+        tags: ['writing', 'ielts'],
+      },
+      {
+        id: 11,
+        name: 'Grammar Practice',
+        description: 'Do exercises on verb tenses',
+        priority: '2',
+        tags: ['grammar', 'practice'],
       },
     ],
   },
@@ -114,7 +136,22 @@ const dataTask = [
   {
     id: 5,
     dateAssigned: '2025-09-12',
-    cards: [],
+    cards: [
+      {
+        id: 13,
+        name: 'Writing Task 1',
+        description: 'Write a report about a given chart',
+        priority: '3',
+        tags: ['writing', 'ielts'],
+      },
+      {
+        id: 14,
+        name: 'Grammar Practice',
+        description: 'Do exercises on verb tenses',
+        priority: '2',
+        tags: ['grammar', 'practice'],
+      },
+    ],
   },
   {
     id: 6,
@@ -144,108 +181,6 @@ const dataTask = [
   },
 ];
 
-const mockData = [
-  {
-    id: 1,
-    title: 'Learning English',
-    cards: [
-      {
-        id: 1,
-        name: 'Reading',
-        description: 'Practice reading articles and books',
-        priorty: '1',
-        status: 'in progress',
-        dueDate: '2025-09-15',
-        tags: ['reading', 'vocabulary'],
-        assignedTo: 'Thành',
-      },
-      {
-        id: 2,
-        name: 'Listening',
-        description: 'Listen to podcasts and conversations',
-        priorty: '2',
-        status: 'not started',
-        dueDate: '2025-09-20',
-        tags: ['listening', 'speaking'],
-        assignedTo: 'Thành',
-      },
-      {
-        id: 3,
-        name: 'Writing',
-        description: 'Practice writing essays and emails',
-        priorty: '3',
-        status: 'not started',
-        dueDate: '2025-09-25',
-        tags: ['writing', 'grammar'],
-        assignedTo: 'Thành',
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Software Engineering',
-    cards: [
-      {
-        id: 1,
-        name: 'Frontend Development',
-        description: 'Learn React, TailwindCSS, Next.js',
-        priorty: '1',
-        status: 'in progress',
-        dueDate: '2025-10-01',
-        tags: ['frontend', 'react'],
-        assignedTo: 'Team A',
-      },
-      {
-        id: 2,
-        name: 'Backend Development',
-        description: 'Learn Node.js, Databases, APIs',
-        priorty: '2',
-        status: 'not started',
-        dueDate: '2025-10-05',
-        tags: ['backend', 'nodejs'],
-        assignedTo: 'Team B',
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Computer Science',
-    cards: [
-      {
-        id: 1,
-        name: 'Data Structures',
-        description: 'Study arrays, linked lists, trees',
-        priorty: '1',
-        status: 'in progress',
-        dueDate: '2025-09-30',
-        tags: ['ds', 'algorithms'],
-        assignedTo: 'Thành',
-      },
-      {
-        id: 2,
-        name: 'Algorithms',
-        description:
-          'Sorting, searching, graph algorithms sssssssssssssssssknm nkdnnd nsdkjfbksdbfjb jbs n nguyen thanh dang',
-        priorty: '2',
-        status: 'not started',
-        dueDate: '2025-10-05',
-        tags: ['algorithms', 'graphs'],
-        assignedTo: 'Thành',
-      },
-      {
-        id: 3,
-        name: 'Operating Systems',
-        description: 'Learn processes, memory, threads',
-        priorty: '3',
-        status: 'not started',
-        dueDate: '2025-10-10',
-        tags: ['os', 'threads'],
-        assignedTo: 'Thành',
-      },
-    ],
-  },
-];
-
 const checkboxColor = (priority: string) => {
   switch (priority) {
     case '1':
@@ -259,77 +194,104 @@ const checkboxColor = (priority: string) => {
   }
 };
 
+const hoverTaskColor = (priority: string) => {
+  switch (priority) {
+    case '1':
+      return 'hover:bg-red-200';
+    case '2':
+      return 'hover:bg-orange-200';
+    case '3':
+      return 'hover:bg-blue-200';
+    default:
+      return 'hover:bg-gray-200';
+  }
+};
+
 export default function Board() {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>();
   return (
-    <div className='flex flex-col pt-2 h-16 px-10'>
-      <div className='flex flex-col gap-4'>
+    <div className='flex flex-col pt-2 px-1 h-full'>
+      <div className='flex flex-col h-28 gap-4 px-10'>
         <h5 className='text-2xl font-semibold'>Upcoming {}</h5>
         <DatePicker value={selectedDate} onChange={setSelectedDate} />
       </div>
 
-      <div className='mt-5 w-fit'>
-        <div className='px-1 flex justify-start gap-5'>
-          {dataTask
-            .filter((item) => dateInRange(item.dateAssigned, selectedDate ? selectedDate : today))
-            .map((board) => (
-              <div key={board.id} className='flex flex-col gap-4 w-[18rem]'>
-                <div className='flex items-center justify-between '>
-                  <h1 className='text-base font-normal'>{board.dateAssigned}</h1>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Ellipsis />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className='w-56 border-0 bg-white' align='center'>
-                      <DropdownMenuLabel></DropdownMenuLabel>
-                      <DropdownMenuGroup className=''>
-                        {menuItems.map((item) => (
-                          <DropdownMenuItem key={item.label}>
+      <div className='pt-2 border-t border-gray-300' />
+
+      <div className='h-full overflow-x-auto pl-10'>
+        <div className='flex gap-5 px-1 py-4'>
+          <div className='px-1 flex justify-start gap-5'>
+            {dataTask
+              .filter((item) => dateInRange(item.dateAssigned, selectedDate ? selectedDate : today))
+              .map((board) => (
+                <div key={board.id} className='flex flex-col gap-4 w-[18rem] flex-shrink-0'>
+                  <div className='flex items-center justify-between '>
+                    <h1 className='text-base font-medium'>
+                      {board.dateAssigned} ⦁ {getDayOfWeek(board.dateAssigned)}
+                    </h1>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Ellipsis />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className='w-56 border-0 bg-white' align='center'>
+                        <DropdownMenuLabel></DropdownMenuLabel>
+                        <DropdownMenuGroup className=''>
+                          {menuItems.map((item) => (
+                            <DropdownMenuItem key={item.label}>
+                              <div className='px-1 flex items-center gap-3 mb-1'>
+                                <item.icon size={17} />
+                                <div className='text-sm font-sans'>{item.label}</div>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+
+                          <DropdownMenuSeparator />
+
+                          <DropdownMenuItem>
                             <div className='px-1 flex items-center gap-3 mb-1'>
-                              <item.icon size={17} />
-                              <div className='text-sm font-sans'>{item.label}</div>
+                              <Archive size={17} />
+                              <div className='text-sm font-sans'>Archive</div>
                             </div>
                           </DropdownMenuItem>
-                        ))}
 
-                        <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <div className='px-1 flex items-center gap-3 mb-1'>
+                              <Trash2 size={17} color='red' />
+                              <div className='text-sm font-sans text-red-500'>Delete</div>
+                            </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
 
-                        <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
-                            <Archive size={17} />
-                            <div className='text-sm font-sans'>Archive</div>
+                  <div className='grid grid-flow-row gap-4'>
+                    {board.cards.map((card) => (
+                      <div
+                        key={card.id}
+                        className={
+                          'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-105 ' +
+                          hoverTaskColor(card.priority)
+                        }
+                      >
+                        <div className='flex justify-start gap-3'>
+                          <div className='py-0.5'>
+                            <Checkbox className={checkboxColor(card.priority)} />
                           </div>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
-                            <Trash2 size={17} color='red' />
-                            <div className='text-sm font-sans text-red-500'>Delete</div>
+                          <div>
+                            <h1 className='text-base'>{card.name}</h1>
+                            <h1 className='text-xs line-clamp-1 wrap-break-word'>{card.description}</h1>
                           </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <div className='grid auto-rows-max grid-flow-row gap-2'>
-                  {board.cards.map((card) => (
-                    <div key={card.id} className='border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5'>
-                      <div className='flex justify-start gap-3'>
-                        <div className='py-0.5'>
-                          <Checkbox className={checkboxColor(card.priority)} />
-                        </div>
-                        <div>
-                          <h1 className='text-base'>{card.name}</h1>
-                          <h1 className='text-xs line-clamp-1 wrap-break-word'>{card.description}</h1>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+
+            <div className='flex flex-col gap-4 w-[18rem]' />
+          </div>
         </div>
       </div>
     </div>
