@@ -53,8 +53,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
         <Input
           id='date'
           value={inputValue}
-          placeholder='June 01, 2025'
-          className='bg-background pr-10'
+          className='bg-background pr-10 border-gray-200'
           onChange={(e) => {
             const d = new Date(e.target.value);
             setInputValue(e.target.value);
