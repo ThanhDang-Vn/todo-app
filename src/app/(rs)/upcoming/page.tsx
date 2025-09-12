@@ -9,12 +9,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
+
+import {
+  Dialog,
+  DialogHeader,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogFooter,
+} from '@/app/components/ui/dialog';
+
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { DatePicker } from '@/app/components/ui/date-picker';
+import { Textarea } from '@/app/components/ui/textarea';
+import { Combobox } from '@/app/components/ui/combobox';
 
 import { useState } from 'react';
 
-import { Pencil, Copy, Archive, Trash2, Ellipsis } from 'lucide-react';
+import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
+import { Button } from '@/app/components/ui/button';
 
 const menuItems = [
   { label: 'Edit', icon: Pencil },
@@ -210,11 +223,12 @@ const hoverTaskColor = (priority: string) => {
 export default function Board() {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [text, setText] = useState('');
   return (
     <div className='flex flex-col pt-2 px-1 h-full'>
       <div className='flex flex-col h-28 gap-4 px-10'>
         <h5 className='text-2xl font-semibold'>Upcoming {}</h5>
-        <DatePicker value={selectedDate} onChange={setSelectedDate} />
+        <DatePicker value={selectedDate} onChange={setSelectedDate} className='w-56' />
       </div>
 
       <div className='pt-2 border-t border-gray-300' />
@@ -268,23 +282,94 @@ export default function Board() {
 
                   <div className='grid grid-flow-row gap-4'>
                     {board.cards.map((card) => (
-                      <div
-                        key={card.id}
-                        className={
-                          'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-105 ' +
-                          hoverTaskColor(card.priority)
-                        }
-                      >
-                        <div className='flex justify-start gap-3'>
-                          <div className='py-0.5'>
-                            <Checkbox className={checkboxColor(card.priority)} />
-                          </div>
-                          <div>
-                            <h1 className='text-base'>{card.name}</h1>
-                            <h1 className='text-xs line-clamp-1 wrap-break-word'>{card.description}</h1>
-                          </div>
-                        </div>
-                      </div>
+                      <Dialog key={card.id}>
+                        <form>
+                          <DialogTrigger asChild>
+                            <div
+                              className={
+                                'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-105 hover:-translate-y-1 hover:scale-105 ' +
+                                hoverTaskColor(card.priority)
+                              }
+                            >
+                              <div className='flex justify-start gap-3'>
+                                <div className='py-0.5'>
+                                  <Checkbox className={checkboxColor(card.priority)} />
+                                </div>
+                                <div>
+                                  <h1 className='text-base'>{card.name}</h1>
+                                  <h1 className='text-xs line-clamp-1 wrap-break-word'>{card.description}</h1>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className='min-w-200'>
+                            <DialogHeader>
+                              <DialogTitle>
+                                <div className='px-6'>Inbox</div>
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className='flex flex-row items-start border-t border-gray-300 min-h-120'>
+                              <div className='flex flex-col min-w-130 pl-6 pt-4'>
+                                <div className='flex items-center gap-3'>
+                                  <Checkbox className={checkboxColor(card.priority)} />
+                                  <h2 className='text-xl font-semibold'>{card.name}</h2>
+                                </div>
+
+                                <div className='flex flex-col'>
+                                  <Textarea value={text} label='Description' onChange={setText} />
+                                </div>
+                              </div>
+
+                              <div className='flex flex-col min-w-80 bg-gray-100 pl-5 pt-4 h-full'>
+                                <div className='space-y-2'>
+                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Project</div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button className='min-w-60 border-1 border-gray-200 hover:bg-gray-200'>
+                                        <div className=' flex flex-1 items-center justify-between '>
+                                          <div className='flex flex-1 items-center font-sans text-gray-600 gap-3'>
+                                            <Inbox />
+                                            <div className='text-base '>Inbox</div>
+                                          </div>
+
+                                          <ChevronDown />
+                                        </div>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className='w-60 bg-white border-gray-300' align='center'>
+                                      <DropdownMenuGroup>
+                                        <DropdownMenuItem className='gap-4'>
+                                          <AlignVerticalSpaceAround />
+                                          Section 1
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className='gap-4'>
+                                          <AlignVerticalSpaceAround />
+                                          Section 2
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem className='gap-4'>
+                                          <AlignVerticalSpaceAround />
+                                          Section 3
+                                        </DropdownMenuItem>
+                                      </DropdownMenuGroup>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+
+                                <div className='space-y-2 pt-2'>
+                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Date</div>
+                                  <DatePicker className='w-60 bg-gray-100' />
+                                </div>
+
+                                <div className='space-y-2 pt-2'>
+                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Priority</div>
+                                  <Combobox />
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </form>
+                      </Dialog>
                     ))}
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui/button';
 import { Calendar } from '@/app/components/ui/calendar';
 import { Input } from '@/app/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import clsx from 'clsx';
 function formatDate(date: Date | undefined) {
   if (!date) {
     return '';
@@ -29,9 +30,10 @@ function isValidDate(date: Date | undefined) {
 type DatePickerProps = {
   value?: Date;
   onChange?: (date: Date) => void;
+  className?: string;
 };
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DatePicker({ value, onChange, className }: DatePickerProps) {
   const today = new Date();
 
   const [open, setOpen] = React.useState(false);
@@ -49,11 +51,11 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
 
   return (
     <div className='flex flex-col gap-3'>
-      <div className='relative flex gap-2 max-w-56'>
+      <div className={clsx('flex gap-2 max-w-200 min-w-40 relative round-lg', className)}>
         <Input
           id='date'
           value={inputValue}
-          className='bg-background pr-10 border-gray-200'
+          className='pr-10 border-gray-200'
           onChange={(e) => {
             const d = new Date(e.target.value);
             setInputValue(e.target.value);
@@ -71,7 +73,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
               <span className='sr-only'>Select date</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className='w-auto overflow-hidden p-0 bg-white' align='end' alignOffset={-50} sideOffset={10}>
+          <PopoverContent className='w-auto overflow-hidden p-0 bg-white' align='end' alignOffset={-15} sideOffset={10}>
             <Calendar
               mode='single'
               selected={date}
