@@ -10,6 +10,7 @@
     "build:css": "tailwindcss build global.css -o output.css"
   },
   "dependencies": {
+    "@kinde-oss/kinde-auth-nextjs": "^2.9.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.1.15",
