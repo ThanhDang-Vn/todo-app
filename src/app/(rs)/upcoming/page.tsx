@@ -54,7 +54,6 @@ const getWeekRange = (date: Date) => {
 const dateInRange = (date: string, selectedDate: Date) => {
   const dateConver = new Date(date);
   const { startDate, endDate } = getWeekRange(selectedDate);
-  console.log(startDate.getDay(), endDate.getDay());
   return dateConver.getDate() >= startDate.getDate() && dateConver.getDate() <= endDate.getDate();
 };
 
