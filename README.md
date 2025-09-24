@@ -14,6 +14,11 @@ pnpm dev
 bun dev
 ```
 
+## Milestones
+- In upcoming we will get all tasks in database and filter them based on date assigned for each task (solving in backend) 
+- Column as "Section" to categorize tasks
+- Add user authentication and authorization
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
