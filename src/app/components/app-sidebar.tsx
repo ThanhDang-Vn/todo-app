@@ -9,12 +9,7 @@ import {
 } from '@/app/components/ui/sidebar';
 import { Bell, Search, Inbox, Calendar, BookUp, CirclePlus, CircleQuestionMark } from 'lucide-react';
 import { NavUser } from './nav-user';
-
-const userData = {
-  name: 'ThDangVn',
-  email: 'dn156162@gmail.com',
-  avatar: '/avatars/shadcn.jpg',
-};
+import { getSession } from '@/lib/session';
 
 const navItems = [
   {
@@ -39,7 +34,13 @@ const navItems = [
   },
 ];
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const session = await getSession();
+  const userData = {
+    name: session?.user.name,
+    email: session?.user.email,
+    avatar: '/avatars/shadcn.jpg',
+  };
   return (
     <Sidebar className='bg-sidebar'>
       <SidebarHeader>

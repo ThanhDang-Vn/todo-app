@@ -16,24 +16,29 @@ const Login = () => {
 
         <h3 className='flex text-zinc-950  text-2xl font-medium'>Login to your account</h3>
 
-        {state?.message && <p className='text-sm text-red-500'>{state.message}</p>}
+        <div className='space-y-4'>
+          <div className='space-y-1'>
+            <div className='grid grid-cols-1 gap-2'>
+              <h1> Email </h1>
+              <Input type='name' name='email' className='w-100' />
+            </div>
 
-        <div className='space-y-2'>
-          <div className='grid grid-cols-1 gap-2'>
-            <h1> Email </h1>
-            <Input type='name' name='email' className='w-100' />
+            <div className='h-5'>
+              {state?.error?.email && <p className='text-sm text-red-500'>{state.error.email}</p>}
+            </div>
           </div>
 
-          {state?.error?.email && <p className='text-sm text-red-500'>{state.error.email}</p>}
-        </div>
+          <div className='space-y-1'>
+            <div className='grid grid-cols-1 gap-2'>
+              <h1> Password </h1>
+              <Input type='password' name='password' className='w-100' />
+            </div>
 
-        <div className='space-y-2'>
-          <div className='grid grid-cols-1 gap-2'>
-            <h1> Password </h1>
-            <Input type='password' name='password' className='w-100' />
+            <div className='h-5'>
+              {state?.message && <p className='text-sm text-red-500'>{state.message}</p>}
+              {state?.error?.password && <p className='text-sm text-red-500'>{state.error.password}</p>}
+            </div>
           </div>
-
-          {state?.error?.password && <p className='text-sm text-red-500'>{state.error.password}</p>}
         </div>
 
         <SubmitButton>Login</SubmitButton>

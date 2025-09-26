@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { BACKEND_URL } from './constant';
 import { FormState, LoginFormSchema, SignUpFormSchema } from './type';
+import { createSession } from './session';
 
 export async function SignUpForm(state: FormState, formData: FormData): Promise<FormState> {
   const validateFormField = SignUpFormSchema.safeParse({
@@ -60,10 +61,24 @@ export async function loginForm(state: FormState, formData: FormData): Promise<F
   });
 
   if (response.ok) {
+    const result = await response.json();
+
+    await createSession({
+      user: {
+        id: result.id,
+        name: result.name,
+        email: result.email,
+      },
+    });
+
+    console.log({
+      result,
+    });
+
     redirect('/inbox');
   } else {
     return {
-      message: response.statusText,
+      message: response.status === 401 ? 'User not exist or password not match' : response.statusText,
     };
   }
 }

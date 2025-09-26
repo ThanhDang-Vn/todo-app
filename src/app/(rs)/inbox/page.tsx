@@ -8,6 +8,8 @@ import {
   DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
 import { Checkbox } from '@/app/components/ui/checkbox';
+import { getSession } from '@/lib/session';
+import { redirect } from 'next/navigation';
 
 import { Pencil, Copy, Archive, Trash2, Ellipsis } from 'lucide-react';
 
@@ -131,7 +133,9 @@ const checkboxColor = (priority: string) => {
   }
 };
 
-export default function Board() {
+export default async function Inbox() {
+  // const session = await getSession();
+  // if (!session || !session.user) redirect('/auth/login');
   return (
     <div className='flex flex-col pt-2 h-16 px-10'>
       <h5 className='text-2xl font-semibold'>Inbox</h5>
