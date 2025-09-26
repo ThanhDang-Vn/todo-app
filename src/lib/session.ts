@@ -1,3 +1,4 @@
+'use server';
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -5,6 +6,7 @@ export type session = {
   user: {
     id: string;
     name: string;
+    email: string;
   };
   //   accessToken: string;
   //   refreshToken: string;
@@ -44,4 +46,8 @@ export async function getSession() {
     console.error('Failed to verify session: ', error);
     redirect('/auth/login');
   }
+}
+
+export async function deleteSession() {
+  (await cookies()).delete('session');
 }

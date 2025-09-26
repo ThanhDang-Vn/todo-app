@@ -28,6 +28,8 @@ import { useState } from 'react';
 
 import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { getSession } from '@/lib/session';
+import { redirect } from 'next/navigation';
 
 const menuItems = [
   { label: 'Edit', icon: Pencil },
@@ -219,10 +221,11 @@ const hoverTaskColor = (priority: string) => {
   }
 };
 
-export default function Board() {
+export default function UpcomingPage() {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [text, setText] = useState('');
+
   return (
     <div className='flex flex-col pt-2 px-1 h-full'>
       <div className='flex flex-col h-28 gap-4 px-10'>

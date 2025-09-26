@@ -2,7 +2,7 @@
 
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
-
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 import {
   DropdownMenu,
@@ -20,8 +20,8 @@ export function NavUser({
   user,
 }: {
   user: {
-    name: string;
-    email: string;
+    name: string | undefined;
+    email: string | undefined;
     avatar: string;
   };
 }) {
@@ -91,8 +91,7 @@ export function NavUser({
               <DropdownMenuItem>
                 <div className='flex items-center gap-2'>
                   <LogOut />
-
-                  <LogoutLink> Log out</LogoutLink>
+                  <Link href={'/api/auth/logout'}> Log out</Link>
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
