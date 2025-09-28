@@ -3,19 +3,20 @@ import React from 'react';
 import { Input } from '@/app/components/ui/input';
 import SubmitButton from '@/app/components/ui/submitButton';
 import { loginForm } from '@/lib/auth';
+import { GoogleLoginButton } from '@/app/components/ui/googleLoginButton';
 
 const Login = () => {
   const [state, action] = React.useActionState(loginForm, undefined);
   return (
-    <form action={action}>
-      <div className='grid grid-cols-1 gap-8'>
-        <div className='flex items-center gap-2'>
-          <img src='/logo.ico' width={35} height={35} />
-          <h3 className='text-sans text-2xl font-extrabold'>Todo Deluxe</h3>
-        </div>
+    <div className='grid grid-cols-1 gap-8'>
+      <div className='flex items-center gap-2'>
+        <img src='/logo.ico' width={35} height={35} />
+        <h3 className='text-sans text-2xl font-extrabold'>Todo Deluxe</h3>
+      </div>
 
-        <h3 className='flex text-zinc-950  text-2xl font-medium'>Login to your account</h3>
+      <h3 className='flex text-zinc-950  text-2xl font-medium'>Login to your account</h3>
 
+      <form action={action}>
         <div className='space-y-4'>
           <div className='space-y-1'>
             <div className='grid grid-cols-1 gap-2'>
@@ -39,24 +40,26 @@ const Login = () => {
               {state?.error?.password && <p className='text-sm text-red-500'>{state.error.password}</p>}
             </div>
           </div>
-        </div>
 
-        <SubmitButton>Login</SubmitButton>
-
-        <div className='flex flex-1 justify-end'>
-          <a href='#' className='underline text-base'>
-            <strong className='font-semibold'>Forgot password</strong>
-          </a>
+          <SubmitButton>Login</SubmitButton>
         </div>
+      </form>
 
-        <div className='flex flex-1 items-center gap-1'>
-          <h1>Don&#39;t have an account?</h1>
-          <a href='/auth/signup' className='underline'>
-            <strong className='font-bold'>Sign up</strong>
-          </a>
-        </div>
+      <GoogleLoginButton>Continue With Google</GoogleLoginButton>
+
+      <div className='flex flex-1 justify-end'>
+        <a href='#' className='underline text-base'>
+          <strong className='font-semibold'>Forgot password</strong>
+        </a>
       </div>
-    </form>
+
+      <div className='flex flex-1 items-center gap-1'>
+        <h1>Don&#39;t have an account?</h1>
+        <a href='/auth/signup' className='underline'>
+          <strong className='font-bold'>Sign up</strong>
+        </a>
+      </div>
+    </div>
   );
 };
 

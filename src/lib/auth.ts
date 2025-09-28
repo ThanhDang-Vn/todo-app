@@ -69,6 +69,8 @@ export async function loginForm(state: FormState, formData: FormData): Promise<F
         name: result.name,
         email: result.email,
       },
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     });
 
     console.log({
@@ -80,5 +82,38 @@ export async function loginForm(state: FormState, formData: FormData): Promise<F
     return {
       message: response.status === 401 ? 'User not exist or password not match' : response.statusText,
     };
+  }
+}
+
+export async function refreshToken(oldRefreshToken: string) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/auth/refresh`, {
+      method: 'POST',
+      body: JSON.stringify({
+        refreshToken: oldRefreshToken,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh token');
+    }
+
+    const { accessToken, refreshToken } = await response.json();
+
+    // update session with new token
+
+    const updateRes = await fetch(`http://localhost:3000/api/auth/update`, {
+      method: 'POST',
+      body: JSON.stringify({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      }),
+    });
+
+    if (!updateRes.ok) throw new Error('failed to update token');
+
+    return accessToken;
+  } catch (error) {
+    console.error('Failed to refresh token: ', error);
   }
 }
