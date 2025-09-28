@@ -8,8 +8,8 @@ export type session = {
     name: string;
     email: string;
   };
-  //   accessToken: string;
-  //   refreshToken: string;
+  accessToken: string;
+  refreshToken: string;
 };
 
 const secretSession = process.env.SESSION_SECRET_KEY!;
@@ -50,4 +50,24 @@ export async function getSession() {
 
 export async function deleteSession() {
   (await cookies()).delete('session');
+}
+
+export async function updateSession({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }) {
+  const cookie = (await cookies()).get('session')?.value;
+
+  if (!cookie) return null;
+
+  const { payload } = await jwtVerify<session>(cookie, encodedKey);
+
+  if (!payload) throw new Error('Session not found');
+
+  const newPayload: session = {
+    user: {
+      ...payload.user,
+    },
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  };
+
+  await createSession(newPayload);
 }
