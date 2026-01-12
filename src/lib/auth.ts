@@ -73,10 +73,6 @@ export async function loginForm(state: FormState, formData: FormData): Promise<F
       refreshToken: result.refreshToken,
     });
 
-    console.log({
-      result,
-    });
-
     redirect('/inbox');
   } else {
     return {

@@ -8,7 +8,7 @@ import { GoogleLoginButton } from '@/app/components/ui/googleLoginButton';
 const Login = () => {
   const [state, action] = React.useActionState(loginForm, undefined);
   return (
-    <div className='grid grid-cols-1 gap-8'>
+    <div className='grid grid-cols-1 gap-8 px-10 py-5 border border-gray-300 rounded-2xl bg-slate-100'>
       <div className='flex items-center gap-2'>
         <img src='/logo.ico' width={35} height={35} />
         <h3 className='text-sans text-2xl font-extrabold'>Todo Deluxe</h3>
