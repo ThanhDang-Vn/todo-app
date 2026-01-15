@@ -68,18 +68,15 @@ export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
 
       {isOpen && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
-          {/* Backdrop (Lớp nền đen mờ) */}
           <div
             className='fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity'
-            onClick={() => setIsOpen(false)} // Click ra ngoài thì đóng
+            onClick={() => setIsOpen(false)}
           ></div>
 
-          {/* Dialog Content */}
           <div className='relative w-full max-w-md bg-white rounded-xl shadow-2xl p-6 transform transition-all scale-100'>
             <h2 className='text-xl font-bold text-gray-800 mb-4'>Create New Task</h2>
 
             <form onSubmit={handleSubmit} className='space-y-4'>
-              {/* Title Input */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>Title *</label>
                 <input
@@ -93,7 +90,6 @@ export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
                 />
               </div>
 
-              {/* Description Input */}
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>Description</label>
                 <textarea
@@ -107,7 +103,6 @@ export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
               </div>
 
               <div className='grid grid-cols-2 gap-4'>
-                {/* Due Date Input */}
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Due Date</label>
                   <input
@@ -119,7 +114,6 @@ export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
                   />
                 </div>
 
-                {/* Priority Select */}
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Priority</label>
                   <select
@@ -135,7 +129,6 @@ export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className='flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100'>
                 <button
                   type='button'
