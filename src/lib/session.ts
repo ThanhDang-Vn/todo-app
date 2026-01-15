@@ -25,9 +25,9 @@ export async function createSession(payload: session) {
     .setExpirationTime(expireAt)
     .sign(encodedKey);
 
-  (await cookies()).set('session', session, {
+  (await cookies()).set('session-action', session, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     expires: expireAt,
     sameSite: 'lax',
     path: '/',
@@ -35,7 +35,7 @@ export async function createSession(payload: session) {
 }
 
 export async function getSession() {
-  const cookie = (await cookies()).get('session')?.value;
+  const cookie = (await cookies()).get('session-action')?.value;
   if (!cookie) return null;
 
   try {
@@ -50,11 +50,11 @@ export async function getSession() {
 }
 
 export async function deleteSession() {
-  (await cookies()).delete('session');
+  (await cookies()).delete('session-action');
 }
 
 export async function updateSession({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }) {
-  const cookie = (await cookies()).get('session')?.value;
+  const cookie = (await cookies()).get('session-action')?.value;
 
   if (!cookie) return null;
 
