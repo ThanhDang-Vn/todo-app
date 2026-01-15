@@ -12,7 +12,7 @@ import {
 import { Bell, Search, Inbox, Calendar, BookUp, CirclePlus, CircleQuestionMark } from 'lucide-react';
 import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
-import path from 'path';
+import { CreateCard } from './card/createCard';
 
 const navItems = [
   {
@@ -42,6 +42,7 @@ type UserProps = {
     name: string | undefined;
     email: string | undefined;
     avatar: string;
+    token: string | undefined;
   };
 };
 
@@ -56,10 +57,7 @@ export function SidebarClient({ user }: UserProps) {
         <SidebarGroup className='group-data-[collapsible=icon]:hidden' />
         <SidebarMenu>
           <SidebarMenuItem className='ml-3 pb-3'>
-            <div className='flex items-center pl-1.4 gap-2'>
-              <CirclePlus fill='red' color='oklch(93.657% 0.00183 249.169)' size={28} />
-              <span className='text-sm font-medium'>Add Task</span>
-            </div>
+            <CreateCard columnId={1} token={user.token} />
           </SidebarMenuItem>
           {navItems.map((item) => {
             const isActive = item.url === pathName;

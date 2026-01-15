@@ -28,8 +28,6 @@ export async function SignUpForm(state: FormState, formData: FormData): Promise<
     body: JSON.stringify(validateFormField.data),
   });
 
-  console.log(validateFormField.data);
-
   if (response.ok) {
     redirect('/auth/login');
   } else {
