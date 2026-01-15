@@ -5,13 +5,15 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-  const response = await authFetch(`${BACKEND_URL}/auth/logout`, {
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    throw new Error('Log out unsuccessfully');
+  try {
+    const response = await authFetch(`${BACKEND_URL}/auth/logout`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    throw error;
   }
+
   await deleteSession();
 
   revalidatePath('/inbox');
