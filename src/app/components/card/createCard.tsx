@@ -1,154 +1,289 @@
 'use client';
 
 import { createCard } from '@/app/api/card';
-import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
+import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface TaskForm {
   title: string;
   description: string;
   dueDate: string;
-  priority: 'Low' | 'Medium' | 'High';
+  priority: string;
+  columnId: string;
+}
+
+interface ColumnOption {
+  id: string;
+  title: string;
 }
 
 interface CreateCardProps {
-  columnId: number;
+  currentColumnId: string;
+  allColumns?: ColumnOption[];
   token: string | undefined;
   onSuccess?: () => void;
 }
 
-export function CreateCard({ columnId, token, onSuccess }: CreateCardProps) {
+const PRIORITY_OPTIONS = [
+  { value: '1', label: 'Priority 1', color: 'text-red-600', bg: 'hover:bg-red-50' },
+  { value: '2', label: 'Priority 2', color: 'text-orange-500', bg: 'hover:bg-orange-50' },
+  { value: '3', label: 'Priority 3', color: 'text-blue-500', bg: 'hover:bg-blue-50' },
+  { value: '4', label: 'Priority 4', color: 'text-gray-500', bg: 'hover:bg-gray-50' },
+];
+
+export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess }: CreateCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+  const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+
+  const [mounted, setMounted] = useState(false);
+
+  const priorityRef = useRef<HTMLDivElement>(null);
+  const columnRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<TaskForm>({
     title: '',
     description: '',
     dueDate: '',
-    priority: 'Low',
+    priority: '4',
+    columnId: currentColumnId,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (priorityRef.current && !priorityRef.current.contains(event.target as Node)) {
+        setShowPriorityDropdown(false);
+      }
+      if (columnRef.current && !columnRef.current.contains(event.target as Node)) {
+        setShowColumnDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title.trim()) return;
     setIsLoading(true);
-
     try {
       await createCard({
-        ...formData,
-        columnId: columnId,
+        title: formData.title,
+        description: formData.description,
+        priority: formData.priority,
+        columnId: Number(formData.columnId),
         token,
         due_to: new Date(formData.dueDate).toISOString(),
       });
-
-      console.log('Form Submitted:', { ...formData, columnId });
-
-      setFormData({ title: '', description: '', dueDate: '', priority: 'Low' });
+      setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
       setIsOpen(false);
-
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Lỗi khi tạo task:', error);
-      alert('Có lỗi xảy ra, vui lòng thử lại!');
+      alert('Có lỗi xảy ra!');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    setIsOpen(false);
+    setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
+  };
+
+  const getPriorityIconColor = (val: string) => PRIORITY_OPTIONS.find((p) => p.value === val)?.color || 'text-gray-500';
+  const getSelectedColumnName = () => allColumns.find((c) => c.id === formData.columnId)?.title || 'Inbox';
+
+  const modalContent = (
+    <div className='fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4'>
+      <div
+        className='fixed inset-0 bg-black/40 backdrop-blur-[1px] transition-opacity'
+        onClick={() => setIsOpen(false)}
+      ></div>
+
+      <div className='relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-200'>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-2'>
+          <div className='space-y-1'>
+            <input
+              type='text'
+              name='title'
+              autoFocus
+              required
+              value={formData.title}
+              onChange={handleChange}
+              placeholder='Task name'
+              className='w-full text-lg font-bold placeholder:text-gray-400 border-none focus:ring-0 focus:outline-0 p-0 bg-transparent text-gray-800'
+            />
+            <textarea
+              name='description'
+              rows={1}
+              value={formData.description}
+              onChange={handleChange}
+              placeholder='Description'
+              className='w-full text-sm text-gray-600 placeholder:text-gray-400 border-none focus:ring-0 focus:outline-0 p-0 bg-transparent resize-none min-h-[24px]'
+              style={{ height: 'auto', minHeight: '24px' }}
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
+            />
+          </div>
+
+          <div className='flex items-center gap-2 mt-2'>
+            <div className='relative group'>
+              <input
+                type='date'
+                name='dueDate'
+                onChange={handleChange}
+                className='absolute inset-0 opacity-0 cursor-pointer w-full'
+              />
+
+              <button
+                type='button'
+                className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium transition-colors ${
+                  formData.dueDate ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Calendar size={14} />
+                {formData.dueDate ? new Date(formData.dueDate).toLocaleDateString() : 'Date'}
+              </button>
+            </div>
+
+            <div className='relative' ref={priorityRef}>
+              <button
+                type='button'
+                onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium hover:bg-gray-100 transition-colors ${
+                  formData.priority !== '4' ? 'bg-gray-50' : ''
+                }`}
+              >
+                <Flag
+                  size={14}
+                  className={getPriorityIconColor(formData.priority)}
+                  fill={formData.priority !== '4' ? 'currentColor' : 'none'}
+                />
+                <span>Priority</span>
+              </button>
+
+              {showPriorityDropdown && (
+                <div className='absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 flex flex-col'>
+                  {PRIORITY_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type='button'
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, priority: option.value }));
+                        setShowPriorityDropdown(false);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2 text-sm w-full text-left transition-colors ${option.bg}`}
+                    >
+                      <Flag size={16} className={option.color} fill={option.value !== '4' ? 'currentColor' : 'none'} />
+                      <span className='flex-1 text-gray-700'>{option.label}</span>
+                      {formData.priority === option.value && <Check size={14} className='text-red-600' />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              type='button'
+              className='flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-gray-600 text-xs font-medium hover:bg-gray-100 transition-colors'
+            >
+              <Clock size={14} />
+              <span>Reminders</span>
+            </button>
+          </div>
+
+          <div className='flex items-center justify-between mt-4 pt-3 border-t border-gray-100'>
+            <div className='relative' ref={columnRef}>
+              <button
+                type='button'
+                onClick={() => setShowColumnDropdown(!showColumnDropdown)}
+                className='flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-100 text-gray-600 transition-colors'
+              >
+                <Inbox size={16} className='text-gray-500' />
+                <span className='text-sm font-medium'>{getSelectedColumnName()}</span>
+                <ChevronDown size={14} className='text-gray-400' />
+              </button>
+
+              {showColumnDropdown && (
+                <div className='absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 max-h-60 overflow-y-auto'>
+                  <div className='px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider'>
+                    Select Project
+                  </div>
+                  {allColumns.map((col) => (
+                    <button
+                      key={col.id}
+                      type='button'
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, columnId: col.id }));
+                        setShowColumnDropdown(false);
+                      }}
+                      className='flex items-center gap-3 px-3 py-2 text-sm w-full text-left hover:bg-gray-50'
+                    >
+                      <span className='text-gray-400'>#</span>
+                      <span
+                        className={`flex-1 ${
+                          formData.columnId === col.id ? 'font-medium text-gray-900' : 'text-gray-600'
+                        }`}
+                      >
+                        {col.title}
+                      </span>
+                      {formData.columnId === col.id && <Check size={14} className='text-red-600' />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className='flex items-center gap-3'>
+              <button
+                type='button'
+                onClick={() => handleCancel()}
+                className='px-3 py-1.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                disabled={isLoading || !formData.title.trim()}
+                className='px-3 py-1.5 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600 disabled:opacity-50 transition-colors'
+              >
+                {isLoading ? 'Adding...' : 'Add task'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <div onClick={() => setIsOpen(true)} className='flex items-center pl-1.4 gap-2'>
-        <CirclePlus fill='red' color='oklch(93.657% 0.00183 249.169)' size={28} />
-        <span className='text-sm font-medium'>Add Task</span>
+      <div
+        onClick={() => setIsOpen(true)}
+        className='flex items-center pl-2 gap-2 cursor-pointer hover:bg-gray-100 py-2 rounded-lg transition-all group'
+      >
+        <div className='group-hover:bg-red-100 rounded-full p-1 transition-colors'>
+          <CirclePlus className='text-red-500' size={24} />
+        </div>
+        <span className='text-sm font-medium text-gray-600 group-hover:text-red-600'>Add Task</span>
       </div>
 
-      {isOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
-          <div
-            className='fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity'
-            onClick={() => setIsOpen(false)}
-          ></div>
-
-          <div className='relative w-full max-w-md bg-white rounded-xl shadow-2xl p-6 transform transition-all scale-100'>
-            <h2 className='text-xl font-bold text-gray-800 mb-4'>Create New Task</h2>
-
-            <form onSubmit={handleSubmit} className='space-y-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Title *</label>
-                <input
-                  type='text'
-                  name='title'
-                  required
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder='What needs to be done?'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Description</label>
-                <textarea
-                  name='description'
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder='Add details...'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none'
-                />
-              </div>
-
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>Due Date</label>
-                  <input
-                    type='datetime-local'
-                    name='dueDate'
-                    value={formData.dueDate}
-                    onChange={handleChange}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>Priority</label>
-                  <select
-                    name='priority'
-                    value={formData.priority}
-                    onChange={handleChange}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white'
-                  >
-                    <option value='Low'>Low</option>
-                    <option value='Medium'>Medium</option>
-                    <option value='High'>High</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className='flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100'>
-                <button
-                  type='button'
-                  onClick={() => setIsOpen(false)}
-                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  disabled={isLoading}
-                  className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2'
-                >
-                  {isLoading ? 'Creating...' : 'Create Card'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {mounted && isOpen && createPortal(modalContent, document.body)}
     </>
   );
 }

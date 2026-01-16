@@ -20,8 +20,9 @@ export const createColumn = async ({ title, token }: { title: string; token: str
   }
 };
 
-export const getAllColumns = async (token: string) => {
+export const getAllColumns = async (token: string | undefined) => {
   try {
+    if (!token) return;
     const res = await axios.get(`${BACKEND_URL}/columns`, {
       headers: {
         Authorization: `Bearer ${token}`,

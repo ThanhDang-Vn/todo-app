@@ -13,6 +13,9 @@ import { Bell, Search, Inbox, Calendar, BookUp, CirclePlus, CircleQuestionMark }
 import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
+import { useEffect, useState } from 'react';
+import { ColumnTask } from '@/lib/types';
+import { getAllColumns } from '../api/column';
 
 const navItems = [
   {
@@ -48,6 +51,22 @@ type UserProps = {
 
 export function SidebarClient({ user }: UserProps) {
   const pathName = usePathname();
+  const [columns, setColumns] = useState<ColumnTask[]>([]);
+
+  useEffect(() => {
+    const getCols = async () => {
+      const cols = await getAllColumns(user.token);
+      setColumns(cols);
+    };
+
+    getCols();
+  }, [user.token]);
+
+  const columnOptions = columns.map((col) => ({
+    id: col.columnId.toString(),
+    title: col.title,
+  }));
+
   return (
     <Sidebar className='bg-sidebar'>
       <SidebarHeader>
@@ -57,7 +76,12 @@ export function SidebarClient({ user }: UserProps) {
         <SidebarGroup className='group-data-[collapsible=icon]:hidden' />
         <SidebarMenu>
           <SidebarMenuItem className='ml-3 pb-3'>
-            <CreateCard columnId={1} token={user.token} />
+            <CreateCard
+              token={user.token}
+              currentColumnId={columnOptions[0]?.id ? columnOptions[0].id : '1'}
+              allColumns={columnOptions} // <--- Truyền danh sách cột vào đây
+              onSuccess={() => console.log('Reload data here')}
+            />
           </SidebarMenuItem>
           {navItems.map((item) => {
             const isActive = item.url === pathName;
