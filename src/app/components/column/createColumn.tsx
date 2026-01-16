@@ -1,12 +1,7 @@
 'use client';
 
-import { createColumn } from '@/app/api/column';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
-
-interface TaskForm {
-  title: string;
-}
 
 interface CreateColumnProp {
   onCreate: (title: string) => void;

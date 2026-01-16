@@ -24,6 +24,7 @@ import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, getAllColumns } from '../api/column';
 import { Card, ColumnTask } from '@/lib/types';
+import { useRefresh } from '../context/refresh.context';
 
 const menuItems = [
   { label: 'Edit', icon: Pencil },
@@ -61,6 +62,8 @@ export default function InboxClient({ token }: { token: string }) {
   const [columns, setColumns] = useState<ColumnTask[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const { refreshKey } = useRefresh();
+
   useEffect(() => {
     const fetchAllColumns = async () => {
       try {
@@ -77,7 +80,7 @@ export default function InboxClient({ token }: { token: string }) {
     };
 
     fetchAllColumns();
-  }, [token]);
+  }, [token, refreshKey]);
 
   const handleCreateColumn = async (title: string) => {
     if (!title.trim) return;
