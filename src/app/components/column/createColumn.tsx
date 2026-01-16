@@ -9,11 +9,10 @@ interface TaskForm {
 }
 
 interface CreateColumnProp {
-  token: string;
-  onSuccess?: () => void;
+  onCreate: (title: string) => void;
 }
 
-export function CreateColumn({ token, onSuccess }: CreateColumnProp) {
+export function CreateColumn({ onCreate }: CreateColumnProp) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState('');
@@ -23,10 +22,9 @@ export function CreateColumn({ token, onSuccess }: CreateColumnProp) {
     setIsLoading(true);
 
     try {
-      console.log(token);
-      await createColumn({ title, token });
+      setIsOpen(false);
+      onCreate(title);
       setTitle('');
-      if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Lỗi khi tạo task:', error);
       alert('Có lỗi xảy ra, vui lòng thử lại!');

@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { BACKEND_URL } from './constant';
-import { FormState, LoginFormSchema, SignUpFormSchema } from './type';
+import { FormState, LoginFormSchema, SignUpFormSchema } from './validateType';
 import { createSession } from './session';
 
 export async function SignUpForm(state: FormState, formData: FormData): Promise<FormState> {
