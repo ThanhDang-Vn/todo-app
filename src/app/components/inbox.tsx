@@ -10,62 +10,24 @@ import {
   DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
 
-import {
-  Dialog,
-  DialogHeader,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogFooter,
-} from '@/app/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle } from '@/app/components/ui/dialog';
 
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { DatePicker } from '@/app/components/ui/date-picker';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Combobox } from '@/app/components/ui/combobox';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { getSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
 import { CreateColumn } from '@/app/components/column/createColumn';
+import { getAllColumns } from '../api/column';
 
 const menuItems = [
   { label: 'Edit', icon: Pencil },
   { label: 'Duplicate', icon: Copy },
 ];
-
-const getWeekRange = (date: Date) => {
-  const dayOfWeek = date.getDay();
-
-  const startDate = new Date(date);
-  const endDate = new Date(date);
-
-  if (dayOfWeek === 0) {
-    startDate.setDate(date.getDate() - 6);
-    endDate.setDate(date.getDate());
-  }
-
-  startDate.setDate(date.getDate() - dayOfWeek + 1);
-
-  endDate.setDate(date.getDate() + 7 - dayOfWeek);
-  return { startDate, endDate };
-};
-
-const dateInRange = (date: string, selectedDate: Date) => {
-  const dateConver = new Date(date);
-  const { startDate, endDate } = getWeekRange(selectedDate);
-  return dateConver.getDate() >= startDate.getDate() && dateConver.getDate() <= endDate.getDate();
-};
-
-const getDayOfWeek = (dateInput: string | Date): string => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-  return days[date.getDay()];
-};
 
 const dataTask = [
   {
@@ -212,6 +174,24 @@ const hoverTaskColor = (priority: string) => {
 
 export default function InboxClient({ token }: { token: string }) {
   const [text, setText] = useState('');
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    const fetchAllColumns = async () => {
+      try {
+        const cols = await getAllColumns(token);
+        console.log(cols);
+        if (cols.length > 0) setColumns(cols);
+        return;
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    };
+
+    fetchAllColumns();
+  }, []);
+
   return (
     <div className='flex flex-col pt-2 pl-10 h-full'>
       <div className='flex items-center gap-5'>
@@ -222,10 +202,10 @@ export default function InboxClient({ token }: { token: string }) {
       <div className='h-full overflow-x-auto'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
-            {dataTask.map((board) => (
-              <div key={board.id} className='flex flex-col gap-4 w-[18rem] flex-shrink-0'>
+            {columns.map((col) => (
+              <div key={col.id} className='flex flex-col gap-4 w-[18rem] flex-shrink-0'>
                 <div className='flex items-center justify-between '>
-                  <h1 className='text-base font-medium'>{board.title}</h1>
+                  <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
                       <Ellipsis />
@@ -263,23 +243,23 @@ export default function InboxClient({ token }: { token: string }) {
                 </div>
 
                 <div className='grid grid-flow-row gap-4'>
-                  {board.cards.map((card) => (
-                    <Dialog key={card.id}>
+                  {col.card.map((c) => (
+                    <Dialog key={c.id}>
                       <form>
                         <DialogTrigger asChild>
                           <div
                             className={
                               'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-105 hover:-translate-y-1 hover:scale-105 ' +
-                              hoverTaskColor(card.priority)
+                              hoverTaskColor(c.priority)
                             }
                           >
                             <div className='flex justify-start gap-3'>
                               <div className='py-0.5'>
-                                <Checkbox className={checkboxColor(card.priority)} />
+                                <Checkbox className={checkboxColor(c.priority)} />
                               </div>
                               <div>
-                                <h1 className='text-base'>{card.name}</h1>
-                                <h1 className='text-xs line-clamp-1 wrap-break-word'>{card.description}</h1>
+                                <h1 className='text-base'>{c.title}</h1>
+                                <h1 className='text-xs line-clamp-1 wrap-break-word'>{c.description}</h1>
                               </div>
                             </div>
                           </div>
@@ -293,8 +273,8 @@ export default function InboxClient({ token }: { token: string }) {
                           <div className='flex flex-row items-start border-t border-gray-300 min-h-120'>
                             <div className='flex flex-col min-w-130 pl-6 pt-4'>
                               <div className='flex items-center gap-3'>
-                                <Checkbox className={checkboxColor(card.priority)} />
-                                <h2 className='text-xl font-semibold'>{card.name}</h2>
+                                <Checkbox className={checkboxColor(c.priority)} />
+                                <h2 className='text-xl font-semibold'>{c.name}</h2>
                               </div>
 
                               <div className='flex flex-col'>
