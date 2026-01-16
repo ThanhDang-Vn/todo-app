@@ -1,6 +1,7 @@
 'use client';
 
 import { createCard } from '@/app/api/card';
+import { useRefresh } from '@/app/context/refresh.context';
 import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -43,6 +44,8 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
 
   const priorityRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
+
+  const { triggerRefresh } = useRefresh();
 
   const [formData, setFormData] = useState<TaskForm>({
     title: '',
@@ -87,6 +90,8 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
         token,
         due_to: new Date(formData.dueDate).toISOString(),
       });
+
+      triggerRefresh();
       setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
       setIsOpen(false);
       if (onSuccess) onSuccess();
