@@ -3,17 +3,31 @@ import axios from 'axios';
 
 export const createColumn = async ({ title, token }: { title: string; token: string }) => {
   try {
-    console.log(token);
-    const res = await fetch(`${BACKEND_URL}/columns`, {
-      method: 'POST',
-      headers: {
-        Authentication: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title }),
-    });
+    const res = await axios.post(
+      `${BACKEND_URL}/columns`,
+      { title },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await res.data;
+    return data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
 
-    const data = await res.json();
+export const getAllColumns = async (token: string) => {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/columns`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.data;
     return data;
   } catch (err) {
     console.error(err);
