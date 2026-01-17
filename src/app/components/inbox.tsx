@@ -120,22 +120,20 @@ export default function InboxClient({ token }: { token: string }) {
     title: col.title,
   }));
 
-  // const handleCreateCard = async (columnId: string, )
-
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <div className='flex flex-col pt-2 pl-10 h-full'>
+    <div className='flex flex-col pt-2 pl-10 max-h-full'>
       <div className='flex items-center gap-5'>
         <h5 className='text-2xl font-semibold'>Inbox</h5>
         <CreateColumn onCreate={handleCreateColumn} />
       </div>
 
-      <div className='h-full overflow-x-auto'>
+      <div className='h-full overflow-x-auto custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {columns.map((col: ColumnTask) => (
-              <div key={`col-${col.columnId}`} className='flex flex-col gap-4 w-[18rem] flex-shrink-0'>
+              <div key={`col-${col.columnId}`} className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'>
                 <div className='flex items-center justify-between '>
                   <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
@@ -177,7 +175,7 @@ export default function InboxClient({ token }: { token: string }) {
                   </DropdownMenu>
                 </div>
 
-                <div className='grid grid-flow-row gap-4'>
+                <div className='flex-1 overflow-y-auto max-h-150 pr-3 space-y-3 pb-2 custom-scrollbar'>
                   {col?.card &&
                     col?.card.map((c: Card) => (
                       <Dialog key={c.cardId}>
@@ -185,23 +183,38 @@ export default function InboxClient({ token }: { token: string }) {
                           <DialogTrigger asChild>
                             <div
                               className={
-                                'border-gray-300 border-1 px-4 py-1 rounded-lg h-22 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-102 hover:-translate-y-1 hover:scale-105 ' +
-                                hoverTaskColor(c.priority)
+                                'group relative w-full bg-white border border-gray-200 rounded-xl p-3.5 ' +
+                                'transition-all duration-200 ease-in-out ' +
+                                'hover:border-gray-300 hover:shadow-sm '
                               }
                             >
-                              <div className='flex justify-start gap-3 h-full'>
-                                <div className='py-0.5'>
+                              <div className='flex items-start gap-3.5'>
+                                <div className='mt-0.5 shrink-0'>
                                   <Checkbox className={checkboxColor(c.priority)} />
                                 </div>
-                                <div className='flex flex-col h-full pb-2'>
-                                  <div className='flex flex-col space-y-1'>
-                                    <h1 className='text-base'>{c.title}</h1>
-                                    <h1 className='text-xs line-clamp-1 wrap-break-word'>{c.description}</h1>
+
+                                <div className='flex flex-col flex-1 min-w-0 gap-1.5'>
+                                  <div className='space-y-0.5'>
+                                    <h3 className='text-sm font-medium text-gray-900 leading-tight truncate'>
+                                      {c.title}
+                                    </h3>
+                                    {c.description && (
+                                      <p className='text-xs text-gray-500 line-clamp-2 font-normal leading-relaxed'>
+                                        {c.description}
+                                      </p>
+                                    )}
                                   </div>
 
-                                  <div className='flex text-xs text-red-800 items-center mt-auto'>
-                                    <CalendarArrowUp size={15} />
-                                    <span>{formatDate(c.created_at)}</span>
+                                  <div className='flex items-center gap-2 mt-1'>
+                                    <div
+                                      className={
+                                        'flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors ' +
+                                        'bg-gray-50 text-gray-500 group-hover:bg-gray-100'
+                                      }
+                                    >
+                                      <CalendarArrowUp size={13} className='opacity-70' />
+                                      <span>{formatDate(c.created_at)}</span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
