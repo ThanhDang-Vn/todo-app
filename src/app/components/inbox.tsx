@@ -19,17 +19,25 @@ import { Combobox } from '@/app/components/ui/combobox';
 
 import { useEffect, useState } from 'react';
 
-import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
+import {
+  Pencil,
+  Copy,
+  Archive,
+  Trash2,
+  Ellipsis,
+  AlignVerticalSpaceAround,
+  Inbox,
+  ChevronDown,
+  PackagePlus,
+  CalendarArrowUp,
+} from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, getAllColumns } from '../api/column';
 import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
-
-const menuItems = [
-  { label: 'Edit', icon: Pencil },
-  { label: 'Duplicate', icon: Copy },
-];
+import { CreateCard } from './card/createCard';
+import { formatDate } from '@/lib/utils';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -61,6 +69,7 @@ export default function InboxClient({ token }: { token: string }) {
   const [text, setText] = useState('');
   const [columns, setColumns] = useState<ColumnTask[]>([]);
   const [loading, setLoading] = useState(false);
+  const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
   const { refreshKey } = useRefresh();
 
@@ -68,7 +77,6 @@ export default function InboxClient({ token }: { token: string }) {
     const fetchAllColumns = async () => {
       try {
         const cols = await getAllColumns(token);
-        console.log(cols);
         if (cols.length > 0) setColumns(cols);
         return;
       } catch (err) {
@@ -107,51 +115,59 @@ export default function InboxClient({ token }: { token: string }) {
     }
   };
 
+  const columnOptions = columns.map((col) => ({
+    id: col.columnId.toString(),
+    title: col.title,
+  }));
+
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <div className='flex flex-col pt-2 pl-10 h-full'>
+    <div className='flex flex-col pt-2 pl-10 max-h-full'>
       <div className='flex items-center gap-5'>
         <h5 className='text-2xl font-semibold'>Inbox</h5>
         <CreateColumn onCreate={handleCreateColumn} />
       </div>
 
-      <div className='h-full overflow-x-auto'>
+      <div className='h-full overflow-x-auto custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {columns.map((col: ColumnTask) => (
-              <div key={`col-${col.columnId}`} className='flex flex-col gap-4 w-[18rem] flex-shrink-0'>
+              <div key={`col-${col.columnId}`} className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'>
                 <div className='flex items-center justify-between '>
                   <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger className='focus:outline-0'>
                       <Ellipsis />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className='w-56 border-0 bg-white' align='center'>
+                    <DropdownMenuContent className='w-40 border-0 bg-white' align='center'>
                       <DropdownMenuLabel></DropdownMenuLabel>
                       <DropdownMenuGroup className=''>
-                        {menuItems.map((item) => (
-                          <DropdownMenuItem key={item.label}>
-                            <div className='px-1 flex items-center gap-3 mb-1'>
-                              <item.icon size={17} />
-                              <div className='text-sm font-sans'>{item.label}</div>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-
-                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.columnId))}>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                            <PackagePlus size={17} />
+                            <div className='text-sm font-sans'>Add Card</div>
+                          </div>
+                        </DropdownMenuItem>
 
                         <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                            <Copy size={17} />
+                            <div className='text-sm font-sans'>Duplicate</div>
+                          </div>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
                             <Archive size={17} />
                             <div className='text-sm font-sans'>Archive</div>
                           </div>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
-                            <Trash2 size={17} color='red' />
-                            <div className='text-sm font-sans text-red-500'>Delete</div>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
+                            <Trash2 size={17} />
+                            <div className='text-sm font-sans '>Delete</div>
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -159,7 +175,7 @@ export default function InboxClient({ token }: { token: string }) {
                   </DropdownMenu>
                 </div>
 
-                <div className='grid grid-flow-row gap-4'>
+                <div className='flex-1 overflow-y-auto max-h-150 pr-3 space-y-3 pb-2 custom-scrollbar'>
                   {col?.card &&
                     col?.card.map((c: Card) => (
                       <Dialog key={c.cardId}>
@@ -167,17 +183,39 @@ export default function InboxClient({ token }: { token: string }) {
                           <DialogTrigger asChild>
                             <div
                               className={
-                                'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-105 hover:-translate-y-1 hover:scale-105 ' +
-                                hoverTaskColor(c.priority)
+                                'group relative w-full bg-white border border-gray-200 rounded-xl p-3.5 ' +
+                                'transition-all duration-200 ease-in-out ' +
+                                'hover:border-gray-300 hover:shadow-sm '
                               }
                             >
-                              <div className='flex justify-start gap-3'>
-                                <div className='py-0.5'>
+                              <div className='flex items-start gap-3.5'>
+                                <div className='mt-0.5 shrink-0'>
                                   <Checkbox className={checkboxColor(c.priority)} />
                                 </div>
-                                <div>
-                                  <h1 className='text-base'>{c.title}</h1>
-                                  <h1 className='text-xs line-clamp-1 wrap-break-word'>{c.description}</h1>
+
+                                <div className='flex flex-col flex-1 min-w-0 gap-1.5'>
+                                  <div className='space-y-0.5'>
+                                    <h3 className='text-sm font-medium text-gray-900 leading-tight truncate'>
+                                      {c.title}
+                                    </h3>
+                                    {c.description && (
+                                      <p className='text-xs text-gray-500 line-clamp-2 font-normal leading-relaxed'>
+                                        {c.description}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className='flex items-center gap-2 mt-1'>
+                                    <div
+                                      className={
+                                        'flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors ' +
+                                        'bg-gray-50 text-gray-500 group-hover:bg-gray-100'
+                                      }
+                                    >
+                                      <CalendarArrowUp size={13} className='opacity-70' />
+                                      <span>{formatDate(c.created_at)}</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -259,6 +297,16 @@ export default function InboxClient({ token }: { token: string }) {
           </div>
         </div>
       </div>
+
+      {creatingCardColId && (
+        <CreateCard
+          open={true}
+          onClose={() => setCreatingCardColId(null)}
+          currentColumnId={creatingCardColId}
+          allColumns={columnOptions}
+          token={token}
+        />
+      )}
     </div>
   );
 }

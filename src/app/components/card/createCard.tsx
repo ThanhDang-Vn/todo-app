@@ -3,7 +3,7 @@
 import { createCard } from '@/app/api/card';
 import { useRefresh } from '@/app/context/refresh.context';
 import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 interface TaskForm {
@@ -24,6 +24,9 @@ interface CreateCardProps {
   allColumns?: ColumnOption[];
   token: string | undefined;
   onSuccess?: () => void;
+  open?: boolean;
+  onClose: () => void;
+  trigger?: ReactNode;
 }
 
 const PRIORITY_OPTIONS = [
@@ -33,8 +36,17 @@ const PRIORITY_OPTIONS = [
   { value: '4', label: 'Priority 4', color: 'text-gray-500', bg: 'hover:bg-gray-50' },
 ];
 
-export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess }: CreateCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CreateCard({
+  currentColumnId,
+  allColumns = [],
+  token,
+  onSuccess,
+  open,
+  onClose,
+  trigger,
+}: CreateCardProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ? open : internalOpen;
   const [isLoading, setIsLoading] = useState(false);
 
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
@@ -93,7 +105,7 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
 
       triggerRefresh();
       setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
-      setIsOpen(false);
+      handleCancel();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Lỗi khi tạo task:', error);
@@ -104,7 +116,8 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
   };
 
   const handleCancel = () => {
-    setIsOpen(false);
+    if (open) onClose();
+    else setInternalOpen(false);
     setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
   };
 
@@ -115,7 +128,7 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
     <div className='fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4'>
       <div
         className='fixed inset-0 bg-black/40 backdrop-blur-[1px] transition-opacity'
-        onClick={() => setIsOpen(false)}
+        onClick={() => setInternalOpen(false)}
       ></div>
 
       <div className='relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-200'>
@@ -224,7 +237,7 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
                 <ChevronDown size={14} className='text-gray-400' />
               </button>
 
-              {showColumnDropdown && (
+              {showColumnDropdown && !open && (
                 <div className='absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 max-h-60 overflow-y-auto'>
                   <div className='px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider'>
                     Select Project
@@ -279,7 +292,7 @@ export function CreateCard({ currentColumnId, allColumns = [], token, onSuccess 
   return (
     <>
       <div
-        onClick={() => setIsOpen(true)}
+        onClick={() => setInternalOpen(true)}
         className='flex items-center pl-2 gap-2 cursor-pointer hover:bg-gray-100 py-2 rounded-lg transition-all group'
       >
         <div className='group-hover:bg-red-100 rounded-full p-1 transition-colors'>

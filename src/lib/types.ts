@@ -40,3 +40,11 @@ export interface Card {
   columnColumnId?: number | null;
   column_task?: ColumnTask;
 }
+
+export interface CreateCardForm {
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: string;
+  columnId: string;
+}

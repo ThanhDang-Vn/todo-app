@@ -10,7 +10,7 @@ export const createColumn = async ({ title, token }: { title: string; token: str
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     const data = await res.data;
     return data;
@@ -22,6 +22,7 @@ export const createColumn = async ({ title, token }: { title: string; token: str
 
 export const getAllColumns = async (token: string | undefined) => {
   try {
+    console.log(localStorage.getItem('session-action'));
     if (!token) return;
     const res = await axios.get(`${BACKEND_URL}/columns`, {
       headers: {

@@ -235,7 +235,7 @@ export default function UpcomingPage() {
 
       <div className='pt-2 border-t border-gray-300' />
 
-      <div className='h-full overflow-x-auto pl-10'>
+      <div className='h-full pl-10'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {dataTask
