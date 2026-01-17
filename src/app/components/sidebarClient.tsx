@@ -81,6 +81,7 @@ export function SidebarClient({ user }: UserProps) {
               currentColumnId={columnOptions[0]?.id ? columnOptions[0].id : '1'}
               allColumns={columnOptions} // <--- Truyền danh sách cột vào đây
               onSuccess={() => console.log('Reload data here')}
+              onClose={() => console.log('Reload data here')}
             />
           </SidebarMenuItem>
           {navItems.map((item) => {

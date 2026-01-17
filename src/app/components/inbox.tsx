@@ -19,17 +19,23 @@ import { Combobox } from '@/app/components/ui/combobox';
 
 import { useEffect, useState } from 'react';
 
-import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
+import {
+  Pencil,
+  Copy,
+  Archive,
+  Trash2,
+  Ellipsis,
+  AlignVerticalSpaceAround,
+  Inbox,
+  ChevronDown,
+  PackagePlus,
+} from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, getAllColumns } from '../api/column';
 import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
-
-const menuItems = [
-  { label: 'Edit', icon: Pencil },
-  { label: 'Duplicate', icon: Copy },
-];
+import { CreateCard } from './card/createCard';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -61,6 +67,7 @@ export default function InboxClient({ token }: { token: string }) {
   const [text, setText] = useState('');
   const [columns, setColumns] = useState<ColumnTask[]>([]);
   const [loading, setLoading] = useState(false);
+  const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
   const { refreshKey } = useRefresh();
 
@@ -68,7 +75,6 @@ export default function InboxClient({ token }: { token: string }) {
     const fetchAllColumns = async () => {
       try {
         const cols = await getAllColumns(token);
-        console.log(cols);
         if (cols.length > 0) setColumns(cols);
         return;
       } catch (err) {
@@ -107,6 +113,13 @@ export default function InboxClient({ token }: { token: string }) {
     }
   };
 
+  const columnOptions = columns.map((col) => ({
+    id: col.columnId.toString(),
+    title: col.title,
+  }));
+
+  // const handleCreateCard = async (columnId: string, )
+
   if (loading) return <div>Đang tải...</div>;
 
   return (
@@ -124,34 +137,37 @@ export default function InboxClient({ token }: { token: string }) {
                 <div className='flex items-center justify-between '>
                   <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger className='focus:outline-0'>
                       <Ellipsis />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className='w-56 border-0 bg-white' align='center'>
+                    <DropdownMenuContent className='w-40 border-0 bg-white' align='center'>
                       <DropdownMenuLabel></DropdownMenuLabel>
                       <DropdownMenuGroup className=''>
-                        {menuItems.map((item) => (
-                          <DropdownMenuItem key={item.label}>
-                            <div className='px-1 flex items-center gap-3 mb-1'>
-                              <item.icon size={17} />
-                              <div className='text-sm font-sans'>{item.label}</div>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-
-                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.columnId))}>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                            <PackagePlus size={17} />
+                            <div className='text-sm font-sans'>Add Card</div>
+                          </div>
+                        </DropdownMenuItem>
 
                         <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                            <Copy size={17} />
+                            <div className='text-sm font-sans'>Duplicate</div>
+                          </div>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
                             <Archive size={17} />
                             <div className='text-sm font-sans'>Archive</div>
                           </div>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem>
-                          <div className='px-1 flex items-center gap-3 mb-1'>
-                            <Trash2 size={17} color='red' />
-                            <div className='text-sm font-sans text-red-500'>Delete</div>
+                          <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
+                            <Trash2 size={17} />
+                            <div className='text-sm font-sans '>Delete</div>
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -259,6 +275,16 @@ export default function InboxClient({ token }: { token: string }) {
           </div>
         </div>
       </div>
+
+      {creatingCardColId && (
+        <CreateCard
+          open={true}
+          onClose={() => setCreatingCardColId(null)}
+          currentColumnId={creatingCardColId}
+          allColumns={columnOptions}
+          token={token}
+        />
+      )}
     </div>
   );
 }
