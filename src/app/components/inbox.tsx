@@ -29,6 +29,7 @@ import {
   Inbox,
   ChevronDown,
   PackagePlus,
+  CalendarArrowUp,
 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
@@ -36,6 +37,7 @@ import { createColumn, getAllColumns } from '../api/column';
 import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
+import { formatDate } from '@/lib/utils';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -183,17 +185,24 @@ export default function InboxClient({ token }: { token: string }) {
                           <DialogTrigger asChild>
                             <div
                               className={
-                                'border-gray-300 border-1 px-4 py-1 rounded-lg h-18 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-105 hover:-translate-y-1 hover:scale-105 ' +
+                                'border-gray-300 border-1 px-4 py-1 rounded-lg h-22 space-y-0.5 transition delay-150 duration-300 ease-in-out focus-within::-translate-y-1 focus-within::scale-102 hover:-translate-y-1 hover:scale-105 ' +
                                 hoverTaskColor(c.priority)
                               }
                             >
-                              <div className='flex justify-start gap-3'>
+                              <div className='flex justify-start gap-3 h-full'>
                                 <div className='py-0.5'>
                                   <Checkbox className={checkboxColor(c.priority)} />
                                 </div>
-                                <div>
-                                  <h1 className='text-base'>{c.title}</h1>
-                                  <h1 className='text-xs line-clamp-1 wrap-break-word'>{c.description}</h1>
+                                <div className='flex flex-col h-full pb-2'>
+                                  <div className='flex flex-col space-y-1'>
+                                    <h1 className='text-base'>{c.title}</h1>
+                                    <h1 className='text-xs line-clamp-1 wrap-break-word'>{c.description}</h1>
+                                  </div>
+
+                                  <div className='flex text-xs text-red-800 items-center mt-auto'>
+                                    <CalendarArrowUp size={15} />
+                                    <span>{formatDate(c.created_at)}</span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
