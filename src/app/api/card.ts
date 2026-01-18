@@ -1,5 +1,5 @@
+import api from '@/lib/axios';
 import { BACKEND_URL } from '@/lib/constant';
-import axios from 'axios';
 
 export const createCard = async (data: {
   title: string;
@@ -7,16 +7,9 @@ export const createCard = async (data: {
   due_to: string;
   description?: string;
   columnId: number;
-  token: string | undefined;
 }) => {
   try {
-    console.log(data.token);
-    console.log(localStorage.getItem('accessToken'));
-    const res = await axios.post(`${BACKEND_URL}/cards`, data, {
-      headers: {
-        Authorization: `Bearer ${data.token}`,
-      },
-    });
+    const res = await api.post(`${BACKEND_URL}/cards`, data, );
 
     return res.data;
   } catch (err) {

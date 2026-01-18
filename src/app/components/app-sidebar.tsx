@@ -7,7 +7,6 @@ export async function AppSidebar() {
     name: session?.user.name,
     email: session?.user.email,
     avatar: '/avatars/shadcn.jpg',
-    token: session?.accessToken,
   };
 
   return <SidebarClient user={userData} />;

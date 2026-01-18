@@ -45,7 +45,6 @@ type UserProps = {
     name: string | undefined;
     email: string | undefined;
     avatar: string;
-    token: string | undefined;
   };
 };
 
@@ -55,12 +54,12 @@ export function SidebarClient({ user }: UserProps) {
 
   useEffect(() => {
     const getCols = async () => {
-      const cols = await getAllColumns(user.token);
+      const cols = await getAllColumns();
       setColumns(cols);
     };
 
     getCols();
-  }, [user.token]);
+  }, []);
 
   const columnOptions = columns.map((col) => ({
     id: col.columnId.toString(),
@@ -77,7 +76,6 @@ export function SidebarClient({ user }: UserProps) {
         <SidebarMenu>
           <SidebarMenuItem className='ml-3 pb-3'>
             <CreateCard
-              token={user.token}
               currentColumnId={columnOptions[0]?.id ? columnOptions[0].id : '1'}
               allColumns={columnOptions} // <--- Truyền danh sách cột vào đây
               onSuccess={() => console.log('Reload data here')}

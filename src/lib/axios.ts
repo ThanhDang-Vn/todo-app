@@ -1,67 +1,52 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
+import { getSession, updateSession, deleteSession } from '@/lib/session';
+import { redirect } from 'next/navigation';
 import { BACKEND_URL } from './constant';
-import { is } from 'date-fns/locale';
 
 const api = axios.create({
   baseURL: BACKEND_URL,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
+api.interceptors.request.use(async (config) => {
+  const session = await getSession();
 
-const processQueue = (error: any) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve();
-    }
-  });
-
-  failedQueue = [];
-};
+  if (session?.accessToken) {
+    config.headers.Authorization = `Bearer ${session.accessToken}`;
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url === '/auth/refresh-token') {
-        return Promise.reject(error);
-      }
 
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      isRefreshing = true;
-
       try {
-        await api.post('/auth/refresh-token');
-        processQueue(null);
+        const session = await getSession();
+        if (!session?.refreshToken) throw new Error('No refresh token');
 
+        const { data } = await axios.post(`${BACKEND_URL}/auth/refresh`, {
+          refreshToken: session.refreshToken,
+        });
+
+        await updateSession({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
-      } catch (err) {
-        processQueue(err);
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
+      } catch (refreshError) {
+        await deleteSession();
+        redirect('auth/login');
+        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   },
 );

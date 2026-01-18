@@ -52,20 +52,7 @@ const checkboxColor = (priority: string) => {
   }
 };
 
-const hoverTaskColor = (priority: string) => {
-  switch (priority) {
-    case '1':
-      return 'hover:bg-red-200';
-    case '2':
-      return 'hover:bg-orange-200';
-    case '3':
-      return 'hover:bg-blue-200';
-    default:
-      return 'hover:bg-gray-200';
-  }
-};
-
-export default function InboxClient({ token }: { token: string }) {
+export default function InboxClient() {
   const [text, setText] = useState('');
   const [columns, setColumns] = useState<ColumnTask[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,7 +63,7 @@ export default function InboxClient({ token }: { token: string }) {
   useEffect(() => {
     const fetchAllColumns = async () => {
       try {
-        const cols = await getAllColumns(token);
+        const cols = await getAllColumns();
         if (cols.length > 0) setColumns(cols);
         return;
       } catch (err) {
@@ -88,7 +75,7 @@ export default function InboxClient({ token }: { token: string }) {
     };
 
     fetchAllColumns();
-  }, [token, refreshKey]);
+  }, [refreshKey]);
 
   const handleCreateColumn = async (title: string) => {
     if (!title.trim) return;
@@ -107,7 +94,7 @@ export default function InboxClient({ token }: { token: string }) {
     setColumns([...prevCols, optimisitcColumn]);
 
     try {
-      const newCol = await createColumn({ title, token });
+      const newCol = await createColumn({ title });
       setColumns((prev) => prev.map((col) => (col.columnId === tempId ? newCol : col)));
     } catch (err) {
       console.error(err);
@@ -304,7 +291,6 @@ export default function InboxClient({ token }: { token: string }) {
           onClose={() => setCreatingCardColId(null)}
           currentColumnId={creatingCardColId}
           allColumns={columnOptions}
-          token={token}
         />
       )}
     </div>
