@@ -22,7 +22,6 @@ interface ColumnOption {
 interface CreateCardProps {
   currentColumnId: string;
   allColumns?: ColumnOption[];
-  token: string | undefined;
   onSuccess?: () => void;
   open?: boolean;
   onClose: () => void;
@@ -36,15 +35,7 @@ const PRIORITY_OPTIONS = [
   { value: '4', label: 'Priority 4', color: 'text-gray-500', bg: 'hover:bg-gray-50' },
 ];
 
-export function CreateCard({
-  currentColumnId,
-  allColumns = [],
-  token,
-  onSuccess,
-  open,
-  onClose,
-  trigger,
-}: CreateCardProps) {
+export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose, trigger }: CreateCardProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ? open : internalOpen;
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +90,6 @@ export function CreateCard({
         description: formData.description,
         priority: formData.priority,
         columnId: Number(formData.columnId),
-        token,
         due_to: new Date(formData.dueDate).toISOString(),
       });
 

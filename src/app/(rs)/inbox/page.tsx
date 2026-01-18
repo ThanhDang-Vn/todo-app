@@ -9,5 +9,5 @@ export default async function InboxPage() {
     redirect('/auth/login');
   }
 
-  return <InboxClient token={session.accessToken} />;
+  return <InboxClient />;
 }

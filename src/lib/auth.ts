@@ -54,7 +54,7 @@ export async function loginForm(state: FormState, formData: FormData): Promise<F
     headers: {
       'Content-Type': 'application/json',
     },
-
+    credentials: 'include',
     body: JSON.stringify(validateFormData.data),
   });
 

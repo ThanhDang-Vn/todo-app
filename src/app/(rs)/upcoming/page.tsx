@@ -28,9 +28,6 @@ import { useState } from 'react';
 
 import { Pencil, Copy, Archive, Trash2, Ellipsis, AlignVerticalSpaceAround, Inbox, ChevronDown } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { getSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
-
 const menuItems = [
   { label: 'Edit', icon: Pencil },
   { label: 'Duplicate', icon: Copy },

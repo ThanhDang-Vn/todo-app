@@ -1,17 +1,8 @@
-import { BACKEND_URL } from '@/lib/constant';
-import axios from 'axios';
+import api from '@/lib/axios';
 
-export const createColumn = async ({ title, token }: { title: string; token: string }) => {
+export const createColumn = async ({ title }: { title: string }) => {
   try {
-    const res = await axios.post(
-      `${BACKEND_URL}/columns`,
-      { title },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    const res = await api.post(`columns`, { title });
     const data = await res.data;
     return data;
   } catch (err) {
@@ -20,15 +11,9 @@ export const createColumn = async ({ title, token }: { title: string; token: str
   }
 };
 
-export const getAllColumns = async (token: string | undefined) => {
+export const getAllColumns = async () => {
   try {
-    console.log(localStorage.getItem('session-action'));
-    if (!token) return;
-    const res = await axios.get(`${BACKEND_URL}/columns`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await api.get(`columns`);
     const data = await res.data;
     return data;
   } catch (err) {
