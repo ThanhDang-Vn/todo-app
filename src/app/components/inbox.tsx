@@ -38,6 +38,7 @@ import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
 import { formatDate } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -96,6 +97,7 @@ export default function InboxClient() {
     try {
       const newCol = await createColumn({ title });
       setColumns((prev) => prev.map((col) => (col.columnId === tempId ? newCol : col)));
+      toast.success('Create column successfully');
     } catch (err) {
       console.error(err);
       setColumns(prevCols);
@@ -207,7 +209,7 @@ export default function InboxClient() {
                               </div>
                             </div>
                           </DialogTrigger>
-                          <DialogContent className='min-w-200'>
+                          <DialogContent className='min-w-200 border-0'>
                             <DialogHeader>
                               <DialogTitle>
                                 <div className='px-6'>Inbox</div>
@@ -230,32 +232,28 @@ export default function InboxClient() {
                                   <div className='text-sm font-sans font-semibold text-gray-500 '>Project</div>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button className='min-w-60 border-1 border-gray-200 hover:bg-gray-200'>
+                                      <Button className='min-w-60 border-1 ring-0 outline-0 border-gray-200 hover:bg-gray-200 focus:outline-0 focus:ring-0'>
                                         <div className=' flex flex-1 items-center justify-between '>
                                           <div className='flex flex-1 items-center font-sans text-gray-600 gap-3'>
                                             <Inbox />
-                                            <div className='text-base '>Inbox</div>
+                                            <div className='text-sm font-medium text-gray-600'>Inbox / {col.title}</div>
                                           </div>
 
                                           <ChevronDown />
                                         </div>
                                       </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className='w-60 bg-white border-gray-300' align='center'>
+                                    <DropdownMenuContent
+                                      className='w-60 bg-white border-gray-300 max-h-[130px] overflow-y-auto'
+                                      align='center'
+                                    >
                                       <DropdownMenuGroup>
-                                        <DropdownMenuItem className='gap-4'>
-                                          <AlignVerticalSpaceAround />
-                                          Section 1
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className='gap-4'>
-                                          <AlignVerticalSpaceAround />
-                                          Section 2
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem className='gap-4'>
-                                          <AlignVerticalSpaceAround />
-                                          Section 3
-                                        </DropdownMenuItem>
+                                        {columns.map((col) => (
+                                          <DropdownMenuItem key={col.columnId} className='gap-4 hover:bg-gray-100'>
+                                            <AlignVerticalSpaceAround />
+                                            {col.title}
+                                          </DropdownMenuItem>
+                                        ))}
                                       </DropdownMenuGroup>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
@@ -263,7 +261,7 @@ export default function InboxClient() {
 
                                 <div className='space-y-2 pt-2'>
                                   <div className='text-sm font-sans font-semibold text-gray-500 '>Date</div>
-                                  <DatePicker className='w-60 bg-gray-100' />
+                                  
                                 </div>
 
                                 <div className='space-y-2 pt-2'>

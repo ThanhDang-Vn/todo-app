@@ -5,6 +5,7 @@ import { useRefresh } from '@/app/context/refresh.context';
 import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { toast } from 'sonner';
 
 interface TaskForm {
   title: string;
@@ -95,11 +96,12 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
 
       triggerRefresh();
       setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
+      toast.success('Create new task successfully');
       handleCancel();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Lỗi khi tạo task:', error);
-      alert('Có lỗi xảy ra!');
+      toast.error('Something wrong...');
     } finally {
       setIsLoading(false);
     }
