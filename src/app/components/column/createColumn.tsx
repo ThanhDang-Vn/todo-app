@@ -2,6 +2,7 @@
 
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CreateColumnProp {
   onCreate: (title: string) => void;
@@ -22,7 +23,7 @@ export function CreateColumn({ onCreate }: CreateColumnProp) {
       setTitle('');
     } catch (error) {
       console.error('Lỗi khi tạo task:', error);
-      alert('Có lỗi xảy ra, vui lòng thử lại!');
+      toast.error('Something wrong...');
     } finally {
       setIsLoading(false);
     }

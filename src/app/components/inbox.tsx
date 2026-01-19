@@ -38,6 +38,7 @@ import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
 import { formatDate } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -96,6 +97,7 @@ export default function InboxClient() {
     try {
       const newCol = await createColumn({ title });
       setColumns((prev) => prev.map((col) => (col.columnId === tempId ? newCol : col)));
+      toast.success('Create column successfully');
     } catch (err) {
       console.error(err);
       setColumns(prevCols);
