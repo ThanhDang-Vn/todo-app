@@ -9,5 +9,7 @@ export default async function InboxPage() {
     redirect('/auth/login');
   }
 
+  console.log(session);
+
   return <InboxClient />;
 }
