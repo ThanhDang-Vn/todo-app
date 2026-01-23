@@ -1,5 +1,6 @@
 import api from '@/lib/axios';
 import { BACKEND_URL } from '@/lib/constant';
+import { Card } from '@/lib/types';
 
 export const createCard = async (data: {
   title: string;
@@ -9,7 +10,29 @@ export const createCard = async (data: {
   columnId: number;
 }) => {
   try {
-    const res = await api.post(`${BACKEND_URL}/cards`, data, );
+    const res = await api.post(`${BACKEND_URL}/cards`, data);
+
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const updateCard = async (cardId: number, data: Partial<Card>) => {
+  try {
+    const res = await api.put(`${BACKEND_URL}/cards/${cardId}`, data);
+
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const deleteCard = async (cardId: number) => {
+  try {
+    const res = await api.delete(`${BACKEND_URL}/cards/${cardId}`);
 
     return res.data;
   } catch (err) {
