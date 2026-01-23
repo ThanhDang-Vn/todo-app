@@ -39,6 +39,8 @@ import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
+import { CardItem } from './card/cardDetail';
+import { deleteCard, updateCard } from '../api/card';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -101,6 +103,42 @@ export default function InboxClient() {
     } catch (err) {
       console.error(err);
       setColumns(prevCols);
+    }
+  };
+
+  const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
+    const prev = [...columns];
+    setColumns((prevCols) =>
+      prevCols.map((col) => ({
+        ...col,
+        card: col?.card!.map((card) => (cardId === card.cardId ? { ...card, data } : card)),
+      })),
+    );
+
+    try {
+      await updateCard(cardId, data);
+    } catch (err) {
+      console.error(err);
+      setColumns(prev);
+      toast.error('Failed to update card');
+    }
+  };
+
+  const handleDelete = async (cardId: number) => {
+    const prev = [...columns];
+    setColumns((prevCols) =>
+      prevCols.map((col) => ({
+        ...col,
+        card: col?.card!.filter((c) => c.cardId !== cardId),
+      })),
+    );
+
+    try {
+      await deleteCard(cardId);
+    } catch (err) {
+      console.error(err);
+      setColumns(prev);
+      toast.error('Failed to delete card');
     }
   };
 
@@ -167,112 +205,14 @@ export default function InboxClient() {
                 <div className='flex-1 overflow-y-auto max-h-150 pr-3 space-y-3 pb-2 custom-scrollbar'>
                   {col?.card &&
                     col?.card.map((c: Card) => (
-                      <Dialog key={c.cardId}>
-                        <form>
-                          <DialogTrigger asChild>
-                            <div
-                              className={
-                                'group relative w-full bg-white border border-gray-200 rounded-xl p-3.5 ' +
-                                'transition-all duration-200 ease-in-out ' +
-                                'hover:border-gray-300 hover:shadow-sm '
-                              }
-                            >
-                              <div className='flex items-start gap-3.5'>
-                                <div className='mt-0.5 shrink-0'>
-                                  <Checkbox className={checkboxColor(c.priority)} />
-                                </div>
-
-                                <div className='flex flex-col flex-1 min-w-0 gap-1.5'>
-                                  <div className='space-y-0.5'>
-                                    <h3 className='text-sm font-medium text-gray-900 leading-tight truncate'>
-                                      {c.title}
-                                    </h3>
-                                    {c.description && (
-                                      <p className='text-xs text-gray-500 line-clamp-2 font-normal leading-relaxed'>
-                                        {c.description}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div className='flex items-center gap-2 mt-1'>
-                                    <div
-                                      className={
-                                        'flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors ' +
-                                        'bg-gray-50 text-gray-500 group-hover:bg-gray-100'
-                                      }
-                                    >
-                                      <CalendarArrowUp size={13} className='opacity-70' />
-                                      <span>{formatDate(c.created_at)}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </DialogTrigger>
-                          <DialogContent className='min-w-200 border-0'>
-                            <DialogHeader>
-                              <DialogTitle>
-                                <div className='px-6'>Inbox</div>
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className='flex flex-row items-start border-t border-gray-300 min-h-120'>
-                              <div className='flex flex-col min-w-130 pl-6 pt-4'>
-                                <div className='flex items-center gap-3'>
-                                  <Checkbox className={checkboxColor(c.priority)} />
-                                  <h2 className='text-xl font-semibold'>{c.title}</h2>
-                                </div>
-
-                                <div className='flex flex-col'>
-                                  <Textarea value={text} label='Description' onChange={setText} />
-                                </div>
-                              </div>
-
-                              <div className='flex flex-col min-w-80 bg-gray-100 pl-5 pt-4 h-full'>
-                                <div className='space-y-2'>
-                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Project</div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button className='min-w-60 border-1 ring-0 outline-0 border-gray-200 hover:bg-gray-200 focus:outline-0 focus:ring-0'>
-                                        <div className=' flex flex-1 items-center justify-between '>
-                                          <div className='flex flex-1 items-center font-sans text-gray-600 gap-3'>
-                                            <Inbox />
-                                            <div className='text-sm font-medium text-gray-600'>Inbox / {col.title}</div>
-                                          </div>
-
-                                          <ChevronDown />
-                                        </div>
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                      className='w-60 bg-white border-gray-300 max-h-[130px] overflow-y-auto'
-                                      align='center'
-                                    >
-                                      <DropdownMenuGroup>
-                                        {columns.map((col) => (
-                                          <DropdownMenuItem key={col.columnId} className='gap-4 hover:bg-gray-100'>
-                                            <AlignVerticalSpaceAround />
-                                            {col.title}
-                                          </DropdownMenuItem>
-                                        ))}
-                                      </DropdownMenuGroup>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-
-                                <div className='space-y-2 pt-2'>
-                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Date</div>
-                                  
-                                </div>
-
-                                <div className='space-y-2 pt-2'>
-                                  <div className='text-sm font-sans font-semibold text-gray-500 '>Priority</div>
-                                  <Combobox />
-                                </div>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </form>
-                      </Dialog>
+                      <CardItem
+                        key={c.cardId}
+                        card={c}
+                        columnTitle={col.title}
+                        allColumns={columnOptions}
+                        onUpdate={handleUpdateCard}
+                        onDelete={handleDelete}
+                      />
                     ))}
                 </div>
               </div>
