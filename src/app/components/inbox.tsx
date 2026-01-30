@@ -10,27 +10,9 @@ import {
   DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
 
-import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle } from '@/app/components/ui/dialog';
-
-import { Checkbox } from '@/app/components/ui/checkbox';
-import { DatePicker } from '@/app/components/ui/date-picker';
-import { Textarea } from '@/app/components/ui/textarea';
-import { Combobox } from '@/app/components/ui/combobox';
-
 import { useEffect, useState } from 'react';
 
-import {
-  Pencil,
-  Copy,
-  Archive,
-  Trash2,
-  Ellipsis,
-  AlignVerticalSpaceAround,
-  Inbox,
-  ChevronDown,
-  PackagePlus,
-  CalendarArrowUp,
-} from 'lucide-react';
+import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, getAllColumns } from '../api/column';
@@ -41,19 +23,6 @@ import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CardItem } from './card/cardDetail';
 import { deleteCard, updateCard } from '../api/card';
-
-const checkboxColor = (priority: string) => {
-  switch (priority) {
-    case '1':
-      return 'outline-red-400 bg-red-100';
-    case '2':
-      return 'outline-orange-400 bg-orange-100';
-    case '3':
-      return 'outline-blue-400 bg-blue-100';
-    default:
-      return 'outline-gray-400 bg-gray-100';
-  }
-};
 
 export default function InboxClient() {
   const [text, setText] = useState('');
@@ -111,7 +80,7 @@ export default function InboxClient() {
     setColumns((prevCols) =>
       prevCols.map((col) => ({
         ...col,
-        card: col?.card!.map((card) => (cardId === card.cardId ? { ...card, data } : card)),
+        card: col.card!.map((card) => (cardId === card.cardId ? { ...card, ...data } : card)),
       })),
     );
 
@@ -208,7 +177,7 @@ export default function InboxClient() {
                       <CardItem
                         key={c.cardId}
                         card={c}
-                        columnTitle={col.title}
+                        column={col}
                         allColumns={columnOptions}
                         onUpdate={handleUpdateCard}
                         onDelete={handleDelete}
