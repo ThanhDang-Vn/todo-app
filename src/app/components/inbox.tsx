@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import {
@@ -77,12 +78,47 @@ export default function InboxClient() {
 
   const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
     const prev = [...columns];
-    setColumns((prevCols) =>
-      prevCols.map((col) => ({
-        ...col,
-        card: col.card!.map((card) => (cardId === card.cardId ? { ...card, ...data } : card)),
-      })),
-    );
+    setColumns((prevCols) => {
+      const newColumnId = data.columnColumnId;
+      let cardToMove: any = null;
+
+      prevCols.forEach((col) => {
+        const found = col.card!.find((c) => c.cardId === cardId);
+
+        if (found) {
+          cardToMove = { ...found, ...data };
+        }
+      });
+
+      if (!cardToMove) {
+        return prevCols;
+      }
+
+      return prevCols.map((col) => {
+        if (col.columnId === newColumnId) {
+          const exists = col.card!.find((c) => c.cardId === cardId);
+          if (exists) {
+            return {
+              ...col,
+              card: col.card!.map((c) => (c.cardId === cardId ? { ...c, ...data } : c)),
+            };
+          }
+          return {
+            ...col,
+            card: [...col.card!, cardToMove],
+          };
+        }
+
+        const isSourceColumn = col.card!.some((c) => c.cardId === cardId);
+        if (isSourceColumn && col.columnId !== newColumnId) {
+          return {
+            ...col,
+            card: col.card!.filter((c) => c.cardId !== cardId),
+          };
+        }
+        return col;
+      });
+    });
 
     try {
       await updateCard(cardId, data);
