@@ -163,19 +163,31 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
             <div className='flex flex-col gap-2 ml-2'>
               <label className='text-sm font-medium text-gray-500'>Description</label>
               <textarea
-                className='min-h-[200px] resize-none focus-visible:ring-1 text-sm font-medium text-gray-700 px-4 py-2'
+                className='min-h-[400px] resize-none outline-0 ring-0 focus-within:border focus-within:border-gray-300 focus:rounded-lg text-sm font-medium text-gray-700 px-4 py-2'
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder='Add a description...'
               />
             </div>
 
-            <div className='mt-auto flex justify-end gap-2'>
-              <Button onClick={handleDelete} disabled={isLoading} size='sm'>
-                <Trash2 size={16} className='mr-2' /> Delete
+            <div className='flex items-center justify-end gap-3'>
+              <Button
+                className='hover:bg-gray-200 transition-all duration-200 shadow-sm'
+                onClick={handleDelete}
+                disabled={isLoading}
+                size='sm'
+              >
+                <Trash2 size={16} className='mr-2' />
+                Delete
               </Button>
-              <Button onClick={handleSave} disabled={isLoading} size='sm'>
-                <Save size={16} className='mr-2' /> Save Changes
+              <Button
+                className='bg-gray-400 text-white hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200'
+                onClick={handleSave}
+                disabled={isLoading}
+                size='sm'
+              >
+                <Save size={16} className='mr-2' />
+                Save
               </Button>
             </div>
           </div>
