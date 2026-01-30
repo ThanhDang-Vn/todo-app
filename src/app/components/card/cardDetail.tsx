@@ -103,6 +103,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const handleColumnChange = async (columnId: number, title: string) => {
     try {
       setColumnTitle(title);
+      console.log(columnId);
       await onUpdate(card.cardId, { columnColumnId: columnId });
     } catch (err) {
       toast.error('Failed to change column');
