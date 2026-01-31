@@ -194,7 +194,7 @@ export default function InboxClient() {
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <div className='flex flex-col pt-2 pl-10 max-h-full'>
+    <div className='flex flex-col pt-2 pl-10 h-full'>
       <div className='flex items-center gap-5'>
         <h5 className='text-2xl font-semibold'>Inbox</h5>
         <CreateColumn onCreate={handleCreateColumn} />
