@@ -76,7 +76,7 @@ export function SidebarClient({ user }: UserProps) {
         <SidebarMenu>
           <SidebarMenuItem className='ml-3 pb-3'>
             <CreateCard
-              currentColumnId={columnOptions[0]?.id ? columnOptions[0].id : '1'}
+              currentColumnId={columnOptions[0]?.id}
               allColumns={columnOptions} // <--- Truyền danh sách cột vào đây
               onSuccess={() => console.log('Reload data here')}
               onClose={() => console.log('Reload data here')}

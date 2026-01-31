@@ -283,15 +283,17 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
 
   return (
     <>
-      <div
-        onClick={() => setInternalOpen(true)}
-        className='flex items-center pl-2 gap-2 cursor-pointer hover:bg-gray-100 py-2 rounded-lg transition-all group'
-      >
-        <div className='group-hover:bg-red-100 rounded-full p-1 transition-colors'>
-          <CirclePlus className='text-red-500' size={24} />
+      {!open && (
+        <div
+          onClick={() => setInternalOpen(true)}
+          className='flex items-center pl-2 gap-2 cursor-pointer hover:bg-gray-100 py-2 rounded-lg transition-all group'
+        >
+          <div className='group-hover:bg-red-100 rounded-full p-1 transition-colors'>
+            <CirclePlus className='text-red-500' size={24} />
+          </div>
+          <span className='text-sm font-medium text-gray-600 group-hover:text-red-600'>Add Task</span>
         </div>
-        <span className='text-sm font-medium text-gray-600 group-hover:text-red-600'>Add Task</span>
-      </div>
+      )}
 
       {mounted && isOpen && createPortal(modalContent, document.body)}
     </>
