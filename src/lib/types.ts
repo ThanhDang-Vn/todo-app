@@ -20,9 +20,9 @@ export interface User {
 export interface Column {
   id: number;
   title: string;
-  order: number;
-  createdAt: Date;
-  updatedAt: Date;
+  order?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   userId?: number | null;
   user?: User | null;
   cards?: Card[];

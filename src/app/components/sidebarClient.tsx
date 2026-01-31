@@ -14,7 +14,7 @@ import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
 import { useEffect, useState } from 'react';
-import { ColumnTask } from '@/lib/types';
+import { Column } from '@/lib/types';
 import { getAllColumns } from '../api/column';
 
 const navItems = [
@@ -50,7 +50,7 @@ type UserProps = {
 
 export function SidebarClient({ user }: UserProps) {
   const pathName = usePathname();
-  const [columns, setColumns] = useState<ColumnTask[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
 
   useEffect(() => {
     const getCols = async () => {
@@ -62,7 +62,7 @@ export function SidebarClient({ user }: UserProps) {
   }, []);
 
   const columnOptions = columns.map((col) => ({
-    id: col.columnId.toString(),
+    id: col.id.toString(),
     title: col.title,
   }));
 

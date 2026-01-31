@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, ColumnTask } from '@/lib/types';
+import { Card, Column } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/app/components/ui/dialog';
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { Button } from '@/app/components/ui/button';
@@ -49,7 +49,7 @@ const priorityOptions = [
 
 interface CardItemProps {
   card: Card;
-  column: ColumnTask;
+  column: Column;
   allColumns: { id: string; title: string }[];
   onUpdate: (cardId: number, data: Partial<Card>) => Promise<void>;
   onDelete: (cardId: number) => Promise<void>;
@@ -67,7 +67,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
     setIsLoading(true);
     try {
-      await onUpdate(card.cardId, { title, description });
+      await onUpdate(card.id, { title, description });
       toast.success('Updated card successfully');
     } catch (error) {
       toast.error('Failed to update card');
@@ -82,7 +82,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
     setIsLoading(true);
     try {
-      await onDelete(card.cardId);
+      await onDelete(card.id);
       toast.success('Card deleted');
       setOpen(false);
     } catch (error) {
@@ -94,7 +94,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
   const handlePriorityChange = async (newPriority: string) => {
     try {
-      await onUpdate(card.cardId, { priority: newPriority });
+      await onUpdate(card.id, { priority: newPriority });
       toast.success(`Changed to Priority ${newPriority}`);
     } catch (error) {
       toast.error('Failed to update priority');
@@ -105,7 +105,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
     try {
       setColumnTitle(title);
       console.log(columnId);
-      await onUpdate(card.cardId, { columnColumnId: columnId });
+      await onUpdate(card.id, { columnId: columnId });
     } catch (err) {
       toast.error('Failed to change column');
     }
@@ -131,7 +131,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
               <div className='flex items-center gap-2 mt-1'>
                 <div className='flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors bg-gray-50 text-gray-500 group-hover:bg-gray-100'>
                   <CalendarArrowUp size={13} className='opacity-70' />
-                  <span>{formatDate(card.created_at)}</span>
+                  <span>{formatDate(card.createdAt)}</span>
                 </div>
               </div>
             </div>
@@ -232,7 +232,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
               <div className='text-xs font-sans font-semibold text-gray-500'>Date</div>
               <div className='flex items-center gap-2'>
                 <CalendarFold size={15} strokeWidth='1.5px' color='red' />
-                <div className='truncate max-w-[140px] text-gray-600 text-xs'>{formatDate(card.created_at)}</div>
+                <div className='truncate max-w-[140px] text-gray-600 text-xs'>{formatDate(card.createdAt)}</div>
               </div>
             </div>
 
