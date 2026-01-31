@@ -1,44 +1,44 @@
-export enum UserRole {
+export enum Role {
   ADMIN = 'ADMIN',
   USER = 'USER',
   EDITOR = 'EDITOR',
 }
 
 export interface User {
-  userId: number;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   hashedRefreshToken?: string | null;
   avatarUrl?: string | null;
-  created_at: Date;
-  role: UserRole;
-
-  column_task?: ColumnTask[];
+  createdAt: Date;
+  role: Role;
+  columns?: Column[];
 }
 
-export interface ColumnTask {
-  columnId: number;
+export interface Column {
+  id: number;
   title: string;
-  created_at: Date;
-
-  userUserId?: number | null;
-  user?: User;
-
-  card?: Card[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+  userId?: number | null;
+  user?: User | null;
+  cards?: Card[];
 }
 
 export interface Card {
-  cardId: number;
+  id: number;
   title: string;
   description: string;
   priority: string;
-  due_to: Date;
-  created_at: Date;
-
-  columnColumnId?: number | null;
-  column_task?: ColumnTask;
+  order: number;
+  dueTo: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  columnId?: number | null;
+  column?: Column | null;
 }
 
 export interface CreateCardForm {
