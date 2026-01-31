@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
-import { createColumn, getAllColumns } from '../api/column';
+import { createColumn, deleteColumn, getAllColumns } from '../api/column';
 import { Card, ColumnTask } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
@@ -24,9 +24,12 @@ import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CardItem } from './card/cardDetail';
 import { deleteCard, updateCard } from '../api/card';
+import { getSession } from '@/lib/session';
+import ConfirmModal from './modal/confirm';
 
 export default function InboxClient() {
-  const [text, setText] = useState('');
+  const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
+  const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
   const [columns, setColumns] = useState<ColumnTask[]>([]);
   const [loading, setLoading] = useState(false);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
@@ -37,6 +40,8 @@ export default function InboxClient() {
     const fetchAllColumns = async () => {
       try {
         const cols = await getAllColumns();
+        const session = await getSession();
+        console.log(session?.accessToken);
         if (cols.length > 0) setColumns(cols);
         return;
       } catch (err) {
@@ -81,6 +86,16 @@ export default function InboxClient() {
     setColumns((prevCols) => {
       const newColumnId = data.columnColumnId;
       let cardToMove: any = null;
+
+      if (!data.columnColumnId) {
+        return prevCols.map((column) => {
+          return {
+            ...column,
+
+            card: column.card!.map((c) => (c.cardId === cardId ? { ...c, ...data } : c)),
+          };
+        });
+      }
 
       prevCols.forEach((col) => {
         const found = col.card!.find((c) => c.cardId === cardId);
@@ -129,7 +144,7 @@ export default function InboxClient() {
     }
   };
 
-  const handleDelete = async (cardId: number) => {
+  const handleDeleteCard = async (cardId: number) => {
     const prev = [...columns];
     setColumns((prevCols) =>
       prevCols.map((col) => ({
@@ -145,6 +160,30 @@ export default function InboxClient() {
       setColumns(prev);
       toast.error('Failed to delete card');
     }
+  };
+
+  const handleDeleteColumn = async () => {
+    if (!columnToDelete) {
+      return;
+    }
+    const prev = [...columns];
+    setColumns((prevCols) => {
+      return prevCols.filter((col) => col.columnId !== columnToDelete);
+    });
+    setModalDeleteColumn(false);
+    try {
+      await deleteColumn(columnToDelete);
+      toast.success('Delete column successfully');
+    } catch (err) {
+      setColumns(prev);
+      console.error(err);
+      toast.error('Failed to delete this column');
+    }
+  };
+
+  const OpenModalDelete = (columnId: number) => {
+    setColumnToDelete(columnId);
+    setModalDeleteColumn(true);
   };
 
   const columnOptions = columns.map((col) => ({
@@ -196,7 +235,7 @@ export default function InboxClient() {
                           </div>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => OpenModalDelete(col.columnId)}>
                           <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
                             <Trash2 size={17} />
                             <div className='text-sm font-sans '>Delete</div>
@@ -216,7 +255,7 @@ export default function InboxClient() {
                         column={col}
                         allColumns={columnOptions}
                         onUpdate={handleUpdateCard}
-                        onDelete={handleDelete}
+                        onDelete={handleDeleteCard}
                       />
                     ))}
                 </div>
@@ -236,6 +275,23 @@ export default function InboxClient() {
           allColumns={columnOptions}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalDeleteColumn}
+        onClose={() => setModalDeleteColumn(false)}
+        onConfirm={handleDeleteColumn}
+        title='Delete column?'
+        confirmText='Delete'
+        variant='danger'
+      >
+        <div className='space-y-3'>
+          <p className='text-gray-700 font-medium'>Are you sure you want to delete this column?</p>
+          <p className='text-sm text-gray-500'>
+            This action cannot be undone. All tasks inside this column will be{' '}
+            <span className='font-semibold text-gray-700'>permanently deleted</span>.
+          </p>
+        </div>
+      </ConfirmModal>
     </div>
   );
 }

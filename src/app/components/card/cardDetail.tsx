@@ -73,6 +73,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       toast.error('Failed to update card');
     } finally {
       setIsLoading(false);
+      setOpen(false);
     }
   };
 

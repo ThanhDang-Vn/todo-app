@@ -21,3 +21,14 @@ export const getAllColumns = async () => {
     throw err;
   }
 };
+
+export const deleteColumn = async (columnId: number) => {
+  try {
+    const res = await api.delete(`columns/${columnId}`);
+    const data = await res.data;
+    return data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
