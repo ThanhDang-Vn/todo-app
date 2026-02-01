@@ -8,33 +8,32 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, deleteColumn, getAllColumns } from '../api/column';
-import { Card, ColumnTask } from '@/lib/types';
+import { Card, Column } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
-import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CardItem } from './card/cardDetail';
 import { deleteCard, updateCard } from '../api/card';
 import { getSession } from '@/lib/session';
 import ConfirmModal from './modal/confirm';
+import { useColumnContext } from '../context/column.context';
 
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
-  const [columns, setColumns] = useState<ColumnTask[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(false);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
   const { refreshKey } = useRefresh();
+  const { addColumn } = useColumnContext();
 
   useEffect(() => {
     const fetchAllColumns = async () => {
@@ -60,11 +59,11 @@ export default function InboxClient() {
 
     const tempId = 1 + Math.random() * 30000;
 
-    const optimisitcColumn: ColumnTask = {
-      columnId: tempId,
+    const optimisitcColumn: Column = {
+      id: tempId,
       title: title,
-      card: [],
-      created_at: new Date(Date.now()),
+      cards: [],
+      createdAt: new Date(Date.now()),
     };
 
     const prevCols = [...columns];
@@ -72,8 +71,9 @@ export default function InboxClient() {
     setColumns([...prevCols, optimisitcColumn]);
 
     try {
+      await addColumn(title);
       const newCol = await createColumn({ title });
-      setColumns((prev) => prev.map((col) => (col.columnId === tempId ? newCol : col)));
+      setColumns((prev) => prev.map((col) => (col.id === tempId ? newCol : col)));
       toast.success('Create column successfully');
     } catch (err) {
       console.error(err);
@@ -84,21 +84,21 @@ export default function InboxClient() {
   const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
     const prev = [...columns];
     setColumns((prevCols) => {
-      const newColumnId = data.columnColumnId;
+      const newColumnId = data.columnId;
       let cardToMove: any = null;
 
-      if (!data.columnColumnId) {
+      if (!data.columnId) {
         return prevCols.map((column) => {
           return {
             ...column,
 
-            card: column.card!.map((c) => (c.cardId === cardId ? { ...c, ...data } : c)),
+            cards: column.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
           };
         });
       }
 
       prevCols.forEach((col) => {
-        const found = col.card!.find((c) => c.cardId === cardId);
+        const found = col.cards!.find((c) => c.id === cardId);
 
         if (found) {
           cardToMove = { ...found, ...data };
@@ -110,25 +110,25 @@ export default function InboxClient() {
       }
 
       return prevCols.map((col) => {
-        if (col.columnId === newColumnId) {
-          const exists = col.card!.find((c) => c.cardId === cardId);
+        if (col.id === newColumnId) {
+          const exists = col.cards!.find((c) => c.id === cardId);
           if (exists) {
             return {
               ...col,
-              card: col.card!.map((c) => (c.cardId === cardId ? { ...c, ...data } : c)),
+              cards: col.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
             };
           }
           return {
             ...col,
-            card: [...col.card!, cardToMove],
+            cards: [...col.cards!, cardToMove],
           };
         }
 
-        const isSourceColumn = col.card!.some((c) => c.cardId === cardId);
-        if (isSourceColumn && col.columnId !== newColumnId) {
+        const isSourceColumn = col.cards!.some((c) => c.id === cardId);
+        if (isSourceColumn && col.id !== newColumnId) {
           return {
             ...col,
-            card: col.card!.filter((c) => c.cardId !== cardId),
+            cards: col.cards!.filter((c) => c.id !== cardId),
           };
         }
         return col;
@@ -149,7 +149,7 @@ export default function InboxClient() {
     setColumns((prevCols) =>
       prevCols.map((col) => ({
         ...col,
-        card: col?.card!.filter((c) => c.cardId !== cardId),
+        cards: col?.cards!.filter((c) => c.id !== cardId),
       })),
     );
 
@@ -168,7 +168,7 @@ export default function InboxClient() {
     }
     const prev = [...columns];
     setColumns((prevCols) => {
-      return prevCols.filter((col) => col.columnId !== columnToDelete);
+      return prevCols.filter((col) => col.id !== columnToDelete);
     });
     setModalDeleteColumn(false);
     try {
@@ -186,15 +186,19 @@ export default function InboxClient() {
     setModalDeleteColumn(true);
   };
 
-  const columnOptions = columns.map((col) => ({
-    id: col.columnId.toString(),
-    title: col.title,
-  }));
+  const columnOptions = useMemo(
+    () =>
+      columns.map((col) => ({
+        id: col.id.toString(),
+        title: col.title,
+      })),
+    [columns],
+  );
 
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <div className='flex flex-col pt-2 pl-10 max-h-full'>
+    <div className='flex flex-col pt-2 pl-10 h-full'>
       <div className='flex items-center gap-5'>
         <h5 className='text-2xl font-semibold'>Inbox</h5>
         <CreateColumn onCreate={handleCreateColumn} />
@@ -203,8 +207,8 @@ export default function InboxClient() {
       <div className='h-full overflow-x-auto custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
-            {columns.map((col: ColumnTask) => (
-              <div key={`col-${col.columnId}`} className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'>
+            {columns.map((col: Column) => (
+              <div key={`col-${col.id}`} className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'>
                 <div className='flex items-center justify-between '>
                   <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
@@ -214,7 +218,7 @@ export default function InboxClient() {
                     <DropdownMenuContent className='w-40 border-0 bg-white' align='center'>
                       <DropdownMenuLabel></DropdownMenuLabel>
                       <DropdownMenuGroup className=''>
-                        <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.columnId))}>
+                        <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.id))}>
                           <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
                             <PackagePlus size={17} />
                             <div className='text-sm font-sans'>Add Card</div>
@@ -235,7 +239,7 @@ export default function InboxClient() {
                           </div>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem onSelect={() => OpenModalDelete(col.columnId)}>
+                        <DropdownMenuItem onSelect={() => OpenModalDelete(col.id)}>
                           <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
                             <Trash2 size={17} />
                             <div className='text-sm font-sans '>Delete</div>
@@ -247,10 +251,10 @@ export default function InboxClient() {
                 </div>
 
                 <div className='flex-1 overflow-y-auto max-h-150 pr-3 space-y-3 pb-2 custom-scrollbar'>
-                  {col?.card &&
-                    col?.card.map((c: Card) => (
+                  {col?.cards &&
+                    col?.cards.map((c: Card) => (
                       <CardItem
-                        key={c.cardId}
+                        key={c.id}
                         card={c}
                         column={col}
                         allColumns={columnOptions}
