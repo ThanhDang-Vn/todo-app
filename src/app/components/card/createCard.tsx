@@ -60,6 +60,10 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
   });
 
   useEffect(() => {
+    console.log(allColumns);
+  }, [allColumns]);
+
+  useEffect(() => {
     setMounted(true);
   }, []);
 

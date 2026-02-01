@@ -8,24 +8,22 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from '@/app/components/ui/dropdown-menu';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, deleteColumn, getAllColumns } from '../api/column';
 import { Card, Column } from '@/lib/types';
 import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
-import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CardItem } from './card/cardDetail';
 import { deleteCard, updateCard } from '../api/card';
 import { getSession } from '@/lib/session';
 import ConfirmModal from './modal/confirm';
+import { useColumnContext } from '../context/column.context';
 
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
@@ -35,6 +33,7 @@ export default function InboxClient() {
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
   const { refreshKey } = useRefresh();
+  const { addColumn } = useColumnContext();
 
   useEffect(() => {
     const fetchAllColumns = async () => {
@@ -65,13 +64,14 @@ export default function InboxClient() {
       title: title,
       cards: [],
       createdAt: new Date(Date.now()),
-    };                                                                                                                                                       
+    };
 
     const prevCols = [...columns];
 
     setColumns([...prevCols, optimisitcColumn]);
 
     try {
+      await addColumn(title);
       const newCol = await createColumn({ title });
       setColumns((prev) => prev.map((col) => (col.id === tempId ? newCol : col)));
       toast.success('Create column successfully');
@@ -92,7 +92,7 @@ export default function InboxClient() {
           return {
             ...column,
 
-            card: column.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
+            cards: column.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
           };
         });
       }
@@ -115,12 +115,12 @@ export default function InboxClient() {
           if (exists) {
             return {
               ...col,
-              card: col.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
+              cards: col.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
             };
           }
           return {
             ...col,
-            card: [...col.cards!, cardToMove],
+            cards: [...col.cards!, cardToMove],
           };
         }
 
@@ -128,7 +128,7 @@ export default function InboxClient() {
         if (isSourceColumn && col.id !== newColumnId) {
           return {
             ...col,
-            card: col.cards!.filter((c) => c.id !== cardId),
+            cards: col.cards!.filter((c) => c.id !== cardId),
           };
         }
         return col;
@@ -149,7 +149,7 @@ export default function InboxClient() {
     setColumns((prevCols) =>
       prevCols.map((col) => ({
         ...col,
-        card: col?.cards!.filter((c) => c.id !== cardId),
+        cards: col?.cards!.filter((c) => c.id !== cardId),
       })),
     );
 
@@ -186,10 +186,14 @@ export default function InboxClient() {
     setModalDeleteColumn(true);
   };
 
-  const columnOptions = columns.map((col) => ({
-    id: col.id.toString(),
-    title: col.title,
-  }));
+  const columnOptions = useMemo(
+    () =>
+      columns.map((col) => ({
+        id: col.id.toString(),
+        title: col.title,
+      })),
+    [columns],
+  );
 
   if (loading) return <div>Đang tải...</div>;
 
