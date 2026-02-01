@@ -1,6 +1,7 @@
 'use client';
 
 import { createCard } from '@/app/api/card';
+import { useColumnContext } from '@/app/context/column.context';
 import { useRefresh } from '@/app/context/refresh.context';
 import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
@@ -43,6 +44,8 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
 
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+
+  const { addCardContext } = useColumnContext();
 
   const [mounted, setMounted] = useState(false);
 
@@ -89,22 +92,23 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
     e.preventDefault();
     if (!formData.title.trim()) return;
     setIsLoading(true);
+    handleCancel();
     try {
-      await createCard({
-        title: formData.title,
-        description: formData.description,
-        priority: formData.priority,
-        columnId: Number(formData.columnId),
-        due_to: new Date(formData.dueDate).toISOString(),
-      });
+      await addCardContext(
+        formData.title,
+        formData.description,
+        formData.priority,
+        Number(formData.columnId),
+        new Date(formData.dueDate).toISOString(),
+      );
 
       triggerRefresh();
       setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
       toast.success('Create new task successfully');
-      handleCancel();
+
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Lỗi khi tạo task:', error);
+      console.error(error);
       toast.error('Something wrong...');
     } finally {
       setIsLoading(false);

@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
 } from '@/app/components/ui/dropdown-menu';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
 import { CreateColumn } from '@/app/components/column/createColumn';
@@ -28,157 +28,30 @@ import { useColumnContext } from '../context/column.context';
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
-  const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(false);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
-  const { refreshKey } = useRefresh();
-  const { addColumn } = useColumnContext();
-
-  useEffect(() => {
-    const fetchAllColumns = async () => {
-      try {
-        const cols = await getAllColumns();
-        const session = await getSession();
-        console.log(session?.accessToken);
-        if (cols.length > 0) setColumns(cols);
-        return;
-      } catch (err) {
-        console.error(err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllColumns();
-  }, [refreshKey]);
+  const { columns, addColumn, updateCardContext, deleteCardContext, deleteColumnContext } = useColumnContext();
 
   const handleCreateColumn = async (title: string) => {
-    if (!title.trim) return;
-
-    const tempId = 1 + Math.random() * 30000;
-
-    const optimisitcColumn: Column = {
-      id: tempId,
-      title: title,
-      cards: [],
-      createdAt: new Date(Date.now()),
-    };
-
-    const prevCols = [...columns];
-
-    setColumns([...prevCols, optimisitcColumn]);
-
-    try {
-      await addColumn(title);
-      const newCol = await createColumn({ title });
-      setColumns((prev) => prev.map((col) => (col.id === tempId ? newCol : col)));
-      toast.success('Create column successfully');
-    } catch (err) {
-      console.error(err);
-      setColumns(prevCols);
-    }
+    await addColumn(title);
   };
 
   const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
-    const prev = [...columns];
-    setColumns((prevCols) => {
-      const newColumnId = data.columnId;
-      let cardToMove: any = null;
-
-      if (!data.columnId) {
-        return prevCols.map((column) => {
-          return {
-            ...column,
-
-            cards: column.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
-          };
-        });
-      }
-
-      prevCols.forEach((col) => {
-        const found = col.cards!.find((c) => c.id === cardId);
-
-        if (found) {
-          cardToMove = { ...found, ...data };
-        }
-      });
-
-      if (!cardToMove) {
-        return prevCols;
-      }
-
-      return prevCols.map((col) => {
-        if (col.id === newColumnId) {
-          const exists = col.cards!.find((c) => c.id === cardId);
-          if (exists) {
-            return {
-              ...col,
-              cards: col.cards!.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
-            };
-          }
-          return {
-            ...col,
-            cards: [...col.cards!, cardToMove],
-          };
-        }
-
-        const isSourceColumn = col.cards!.some((c) => c.id === cardId);
-        if (isSourceColumn && col.id !== newColumnId) {
-          return {
-            ...col,
-            cards: col.cards!.filter((c) => c.id !== cardId),
-          };
-        }
-        return col;
-      });
-    });
-
-    try {
-      await updateCard(cardId, data);
-    } catch (err) {
-      console.error(err);
-      setColumns(prev);
-      toast.error('Failed to update card');
-    }
+    await updateCardContext(cardId, data);
   };
 
   const handleDeleteCard = async (cardId: number) => {
-    const prev = [...columns];
-    setColumns((prevCols) =>
-      prevCols.map((col) => ({
-        ...col,
-        cards: col?.cards!.filter((c) => c.id !== cardId),
-      })),
-    );
-
-    try {
-      await deleteCard(cardId);
-    } catch (err) {
-      console.error(err);
-      setColumns(prev);
-      toast.error('Failed to delete card');
-    }
+    await deleteCardContext(cardId);
   };
 
   const handleDeleteColumn = async () => {
     if (!columnToDelete) {
       return;
     }
-    const prev = [...columns];
-    setColumns((prevCols) => {
-      return prevCols.filter((col) => col.id !== columnToDelete);
-    });
+
     setModalDeleteColumn(false);
-    try {
-      await deleteColumn(columnToDelete);
-      toast.success('Delete column successfully');
-    } catch (err) {
-      setColumns(prev);
-      console.error(err);
-      toast.error('Failed to delete this column');
-    }
+    await deleteColumnContext(columnToDelete);
   };
 
   const OpenModalDelete = (columnId: number) => {
