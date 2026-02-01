@@ -34,9 +34,9 @@ export interface Card {
   description: string;
   priority: string;
   order: number;
-  dueTo: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  dueTo: string;
+  createdAt: string;
+  updatedAt: string;
   columnId?: number | null;
   column?: Column | null;
 }
