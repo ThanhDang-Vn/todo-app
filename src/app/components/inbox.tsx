@@ -12,7 +12,7 @@ import {
 
 import { useMemo, useState } from 'react';
 
-import { Copy, Archive, Trash2, Ellipsis, PackagePlus } from 'lucide-react';
+import { Copy, Archive, Trash2, Ellipsis, PackagePlus, Loader2 } from 'lucide-react';
 import { CreateColumn } from '@/app/components/column/createColumn';
 import { createColumn, deleteColumn, getAllColumns } from '../api/column';
 import { Card, Column } from '@/lib/types';
@@ -23,18 +23,32 @@ import { CardItem } from './card/cardDetail';
 import { deleteCard, updateCard } from '../api/card';
 import { getSession } from '@/lib/session';
 import ConfirmModal from './modal/confirm';
-import { useColumnContext } from '../context/column.context';
+import { useHandlerContext } from '../context/handler.context';
 
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
-  const { columns, addColumn, updateCardContext, deleteCardContext, deleteColumnContext } = useColumnContext();
+  const {
+    columns,
+    isLoading,
+    addColumn,
+    duplicateColumnContext,
+    updateCardContext,
+    deleteCardContext,
+    deleteColumnContext,
+  } = useHandlerContext();
 
   const handleCreateColumn = async (title: string) => {
     await addColumn(title);
+  };
+
+  const handleDuplicateColumn = async (column: Column, columnId: number) => {
+    if (!column) return;
+    const nearColumn = columns.find((col) => col.order! > column.order!);
+    const order = nearColumn ? (column.order! + nearColumn.order!) / 2 : column.order! + 10000;
+    await duplicateColumnContext(column, columnId, order);
   };
 
   const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
@@ -68,20 +82,27 @@ export default function InboxClient() {
     [columns],
   );
 
-  if (loading) return <div>Đang tải...</div>;
-
   return (
     <div className='flex flex-col pt-2 pl-10 h-full'>
-      <div className='flex items-center gap-5'>
+      <div className='flex items-center gap-10'>
         <h5 className='text-2xl font-semibold'>Inbox</h5>
         <CreateColumn onCreate={handleCreateColumn} />
       </div>
+
+      {isLoading && (
+        <div className='flex flex-1 min-h-full w-full items-center justify-center bg-white/80 z-50'>
+          <Loader2 className='h-12 w-12 animate-spin text-red-400' />
+        </div>
+      )}
 
       <div className='h-full overflow-x-auto custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {columns.map((col: Column) => (
-              <div key={`col-${col.id}`} className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'>
+              <div
+                key={`col-${col.id}-${Date.now()}`}
+                className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'
+              >
                 <div className='flex items-center justify-between '>
                   <h1 className='text-base font-medium'>{col.title}</h1>
                   <DropdownMenu>
@@ -98,7 +119,7 @@ export default function InboxClient() {
                           </div>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleDuplicateColumn(col, col.id)}>
                           <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
                             <Copy size={17} />
                             <div className='text-sm font-sans'>Duplicate</div>

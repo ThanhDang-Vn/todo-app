@@ -1,7 +1,7 @@
 'use client';
 
 import { createCard } from '@/app/api/card';
-import { useColumnContext } from '@/app/context/column.context';
+import { useHandlerContext } from '@/app/context/handler.context';
 import { useRefresh } from '@/app/context/refresh.context';
 import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
@@ -45,7 +45,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
 
-  const { addCardContext } = useColumnContext();
+  const { addCardContext } = useHandlerContext();
 
   const [mounted, setMounted] = useState(false);
 
