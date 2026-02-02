@@ -137,7 +137,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         await completeCard(cardId);
       } catch (err) {
-        console.error(err);
+        console.error(err); 
         setColumns(prev);
         toast.error('Failed to complete task');
       }
