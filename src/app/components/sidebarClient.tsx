@@ -9,14 +9,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/app/components/ui/sidebar';
-import { Bell, Search, Inbox, Calendar, BookUp, CirclePlus, CircleQuestionMark } from 'lucide-react';
+import { Search, Inbox, Calendar, BookUp, CircleQuestionMark } from 'lucide-react';
 import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
-import { useEffect, useMemo, useState } from 'react';
-import { Column } from '@/lib/types';
-import { getAllColumns } from '../api/column';
-import { useColumnContext } from '../context/column.context';
+import { useMemo } from 'react';
+import { useHandlerContext } from '../context/handler.context';
 
 const navItems = [
   {
@@ -51,7 +49,7 @@ type UserProps = {
 
 export function SidebarClient({ user }: UserProps) {
   const pathName = usePathname();
-  const { columns } = useColumnContext();
+  const { columns } = useHandlerContext();
 
   const columnOptions = useMemo(
     () =>

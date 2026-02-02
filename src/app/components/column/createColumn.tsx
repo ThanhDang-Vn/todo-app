@@ -1,6 +1,6 @@
 'use client';
 
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,9 +33,9 @@ export function CreateColumn({ onCreate }: CreateColumnProp) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className='flex items-center gap-2 px-3 py-2 text-gray-600 bg-gray-100/50 hover:bg-gray-200 rounded-lg transition-all w-40 h-fit border-2 border-dashed border-gray-300 hover:border-gray-400'
+        className='flex items-center gap-2 px-1 py-1 text-gray-600 bg-gray-100/50 hover:bg-gray-200 rounded-4xl transition-all w-33 h-fit border-1 border-gray-300 hover:border-gray-400'
       >
-        <CirclePlus className='text-blue-500' size={20} />
+        <Plus className='text-gray-500' size={20} />
         <span className='text-sm font-semibold'>Add column</span>
       </button>
 

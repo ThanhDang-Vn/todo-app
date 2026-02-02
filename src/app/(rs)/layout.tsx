@@ -3,12 +3,12 @@ import { AppSidebar } from '@/app/components/app-sidebar';
 import { Separator } from '@/app/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/app/components/ui/sidebar';
 import { RefreshProvider } from '../context/refresh.context';
-import { ColumnProvider } from '../context/column.context';
+import { HandlerProvider } from '../context/handler.context';
 
 export default async function RSLayout({ children }: { children: React.ReactNode }) {
   return (
     <RefreshProvider>
-      <ColumnProvider>
+      <HandlerProvider>
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
@@ -21,7 +21,7 @@ export default async function RSLayout({ children }: { children: React.ReactNode
             {children}
           </SidebarInset>
         </SidebarProvider>
-      </ColumnProvider>
+      </HandlerProvider>
     </RefreshProvider>
   );
 }

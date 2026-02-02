@@ -3,15 +3,16 @@
 
 import { Card, Column } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, getAllColumns } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
 import { createCard, deleteCard, updateCard } from '../api/card';
 
-interface ColumnContextType {
+interface HandlerContextType {
   columns: Column[];
   isLoading: boolean;
   fetchColumns: () => Promise<void>;
   addColumn: (title: string) => Promise<void>;
+  duplicateColumnContext: (column: Column, columnId: number, order: number) => Promise<void>;
   updateCardContext: (cardId: number, data: Partial<Card>) => Promise<void>;
   addCardContext: (
     title: string,
@@ -24,9 +25,9 @@ interface ColumnContextType {
   deleteColumnContext: (ColumnId: number) => Promise<void>;
 }
 
-const ColumnContext = createContext<ColumnContextType | undefined>(undefined);
+const HandlerContext = createContext<HandlerContextType | undefined>(undefined);
 
-export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -76,6 +77,29 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.error(err);
       setColumns(previousColumns);
       toast.error('Failed to create new column');
+    }
+  };
+
+  const duplicateColumnContext = async (column: Column, columnId: number, order: number) => {
+    const prev = [...columns];
+
+    const columnCopy = {
+      ...column,
+      id: Math.random() + Date.now(),
+      order: order,
+    };
+
+    setColumns([...columns, columnCopy].sort((a, b) => a.order! - b.order!));
+
+    try {
+      const newColumn = await duplicateColumn(columnId);
+      setColumns((prevCols) => prevCols.map((col) => (col.id === columnId ? newColumn : col)));
+      toast.success('Duplication sucessfully');
+    } catch (err) {
+      setColumns(prev);
+      console.error(err);
+      toast.error('Failed to duplicate column');
+      throw err;
     }
   };
 
@@ -154,7 +178,6 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           return col;
         });
       });
-
     } catch (error) {
       console.error(error);
 
@@ -175,11 +198,9 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateCardContext = async (cardId: number, data: Partial<Card>) => {
     const previousColumns = [...columns];
 
-    // ✅ Logic phức tạp này đã nằm trong setColumns, nên nó an toàn
     setColumns((prevCols) => {
       const newColumnId = data.columnId;
 
-      // Trường hợp 1: Update tại chỗ (không đổi cột)
       if (!newColumnId) {
         return prevCols.map((column) => ({
           ...column,
@@ -187,10 +208,7 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }));
       }
 
-      // Trường hợp 2: Di chuyển sang cột khác (Drag & Drop)
       let cardToMove: Card | undefined;
-
-      // Tìm card
       for (const col of prevCols) {
         const found = col.cards?.find((c) => c.id === cardId);
         if (found) {
@@ -202,7 +220,6 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (!cardToMove) return prevCols;
 
       return prevCols.map((col) => {
-        // Nếu là cột ĐÍCH
         if (col.id === newColumnId) {
           const exists = col.cards?.some((c) => c.id === cardId);
           if (exists) {
@@ -219,7 +236,6 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           };
         }
 
-        // Nếu là cột NGUỒN -> Xóa card đi
         const isSourceColumn = col.cards?.some((c) => c.id === cardId);
         if (isSourceColumn && col.id !== newColumnId) {
           return {
@@ -260,12 +276,13 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   return (
-    <ColumnContext.Provider
+    <HandlerContext.Provider
       value={{
         columns,
         isLoading,
         fetchColumns,
         addColumn,
+        duplicateColumnContext,
         updateCardContext,
         addCardContext,
         deleteCardContext,
@@ -273,14 +290,14 @@ export const ColumnProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }}
     >
       {children}
-    </ColumnContext.Provider>
+    </HandlerContext.Provider>
   );
 };
 
-export const useColumnContext = () => {
-  const context = useContext(ColumnContext);
+export const useHandlerContext = () => {
+  const context = useContext(HandlerContext);
   if (!context) {
-    throw new Error('useColumnContext must be used within a ColumnProvider');
+    throw new Error('useHandlerContext must be used within a HandlerProvider');
   }
   return context;
 };
