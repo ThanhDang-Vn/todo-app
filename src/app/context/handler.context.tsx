@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { Card, Column } from '@/lib/types';
+import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
-import { createCard, deleteCard, updateCard } from '../api/card';
+import { completeCard, createCard, deleteCard, updateCard } from '../api/card';
+import { Button } from '../components/ui/button';
+import { CheckCircle2, Undo2 } from 'lucide-react';
 
 interface HandlerContextType {
   columns: Column[];
@@ -20,7 +22,9 @@ interface HandlerContextType {
     priority: string,
     columnId: number,
     due_to: string,
+    reminder: Reminder | undefined,
   ) => Promise<void>;
+  completeCardContext: (cardId: number) => Promise<void>;
   deleteCardContext: (cardId: number) => Promise<void>;
   deleteColumnContext: (ColumnId: number) => Promise<void>;
 }
@@ -80,6 +84,67 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const completeCardContext = async (cardId: number) => {
+    const prev = [...columns];
+
+    setColumns((prevCols) =>
+      prevCols.map((col) => {
+        return {
+          ...col,
+          cards: col.cards!.filter((card) => card.id !== cardId),
+        };
+      }),
+    );
+
+    let undone = false;
+
+    toast.custom(
+      (t) => (
+        <div className='flex items-center justify-between w-full max-w-md p-4 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50  gap-4'>
+          <div className='flex items-center gap-3'>
+            <div className='flex items-center justify-center w-8 h-8 bg-green-100 rounded-full shrink-0'>
+              <CheckCircle2 size={20} className='text-green-600' />
+            </div>
+
+            <div className='flex flex-col'>
+              <span className='text-sm font-semibold text-gray-800 '>Đã hoàn thành</span>
+              <span className='text-xs text-gray-500 dark:text-gray-400 line-clamp-1'>
+                Task đã được chuyển sang Done
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              undone = true;
+              setColumns(prev);
+              toast.dismiss(t);
+            }}
+            className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900 transition-colors '
+          >
+            <Undo2 size={14} />
+            Undo
+          </button>
+        </div>
+      ),
+      {
+        duration: 4000,
+      },
+    );
+
+    setTimeout(async () => {
+      if (undone) return;
+
+      try {
+        await completeCard(cardId);
+      } catch (err) {
+        console.error(err);
+        setColumns(prev);
+        toast.error('Failed to complete task');
+      }
+    }, 3000);
+  };
+
   const duplicateColumnContext = async (column: Column, columnId: number, order: number) => {
     const prev = [...columns];
 
@@ -124,6 +189,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     priority: string,
     columnId: number,
     due_to: string,
+    reminder: Reminder | undefined,
   ) => {
     const prev = [...columns];
 
@@ -166,6 +232,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         priority,
         columnId,
         due_to: new Date(due_to).toISOString(),
+        reminders: reminder ? [reminder] : undefined,
       });
       setColumns((prevCols) => {
         return prevCols.map((col) => {
@@ -285,6 +352,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         duplicateColumnContext,
         updateCardContext,
         addCardContext,
+        completeCardContext,
         deleteCardContext,
         deleteColumnContext,
       }}

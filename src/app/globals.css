@@ -92,3 +92,23 @@ body {
     background-color: rgba(107, 114, 128, 0.8);
   }
 }
+
+@keyframes jelly {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  75% {
+    transform: scale(0.95);
+  }
+}
+
+.animate-jelly {
+  animation: jelly 0.4s ease-in-out;
+}

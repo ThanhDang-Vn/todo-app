@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useHandlerContext } from '@/app/context/handler.context';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -61,6 +62,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const [description, setDescription] = useState(card.description || '');
   const [isLoading, setIsLoading] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.title);
+  const { completeCardContext } = useHandlerContext();
 
   const handleSave = async () => {
     if (title === card.title && description === card.description) return;
@@ -75,6 +77,10 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       setIsLoading(false);
       setOpen(false);
     }
+  };
+
+  const handleCompleteCard = async (cardId: number) => {
+    await completeCardContext(cardId);
   };
 
   const handleDelete = async () => {
@@ -118,8 +124,22 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       <DialogTrigger asChild>
         <div className='group relative w-full bg-white border border-gray-200 rounded-xl p-3.5 transition-all duration-200 ease-in-out hover:border-gray-300 hover:shadow-sm cursor-pointer text-left'>
           <div className='flex items-start gap-3.5'>
-            <div className='mt-0.5 shrink-0'>
-              <Checkbox className={checkboxColor(card.priority)} />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCompleteCard(card.id);
+              }}
+              className='relative flex items-center justify-center w-4 h-4 group/checkbox cursor-pointer'
+            >
+              <Checkbox
+                className={`peer w-full  h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
+                 ${checkboxColor(card.priority)}`}
+              />
+              <Check
+                size={14}
+                strokeWidth={3}
+                className='absolute text-gray-400 opacity-0 group-hover/checkbox:opacity-100 pointer-events-none transition-all duration-200 peer-data-[state=checked]:hidden'
+              />
             </div>
             <div className='flex flex-col flex-1 min-w-0 gap-1.5'>
               <div className='space-y-0.5'>
@@ -154,7 +174,23 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
         <div className='flex flex-row items-stretch min-h-[500px]'>
           <div className='flex flex-col flex-1 px-4 py-2 gap-6'>
             <div className='flex items-center gap-3'>
-              <Checkbox className={checkboxColor(card.priority)} />
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCompleteCard(card.id);
+                }}
+                className='relative flex items-center justify-center w-5 h-5 group/checkbox cursor-pointer ml-2'
+              >
+                <Checkbox
+                  className={`peer w-full  h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
+                 ${checkboxColor(card.priority)}`}
+                />
+                <Check
+                  size={16}
+                  strokeWidth={3}
+                  className='absolute text-gray-400 opacity-0 group-hover/checkbox:opacity-100 pointer-events-none transition-all duration-200 peer-data-[state=checked]:hidden'
+                />
+              </div>
               <input
                 className='text-xl font-semibold text-gray-700 w-full border-none focus:outline-none focus:ring-1 focus:ring-gray-200 rounded px-1 py-0.5'
                 value={title}
