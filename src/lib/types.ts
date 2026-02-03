@@ -39,6 +39,14 @@ export interface Card {
   updatedAt: string;
   columnId?: number | null;
   column?: Column | null;
+  reminders?: Reminder[];
+}
+
+export interface Reminder {
+  id?: number;
+  remindAt: Date;
+  cardId?: number;
+  card?: Card | null;
 }
 
 export interface CreateCardForm {
@@ -47,4 +55,11 @@ export interface CreateCardForm {
   dueDate: string;
   priority: string;
   columnId: string;
+}
+
+export interface ReminderOptions {
+  id: string;
+  label: string;
+  timeLabel: string;
+  calculateDate: () => Date;
 }

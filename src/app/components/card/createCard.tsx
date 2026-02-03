@@ -3,10 +3,27 @@
 import { createCard } from '@/app/api/card';
 import { useHandlerContext } from '@/app/context/handler.context';
 import { useRefresh } from '@/app/context/refresh.context';
-import { CirclePlus, Flag, Calendar, Clock, MoreHorizontal, Inbox, ChevronDown, Check } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+import {
+  CirclePlus,
+  Flag,
+  Calendar,
+  Clock,
+  MoreHorizontal,
+  Inbox,
+  ChevronDown,
+  Check,
+  ClockPlus,
+  AlarmClock,
+  X,
+} from 'lucide-react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
+import { DropdownMenuCheckboxItem, DropdownMenuGroup, DropdownMenuItem } from '../ui/dropdown-menu';
+import { Button } from '../ui/button';
+import { Reminder, ReminderOptions } from '@/lib/types';
+import { REMINDERS_OPTIONS } from '@/lib/constant';
 
 interface TaskForm {
   title: string;
@@ -48,6 +65,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
   const { addCardContext } = useHandlerContext();
 
   const [mounted, setMounted] = useState(false);
+  const [reminderSelected, setReminderSelected] = useState<{ id: string; date: Date } | null>(null);
 
   const priorityRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
@@ -94,16 +112,24 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
     setIsLoading(true);
     handleCancel();
     try {
+      const date = reminderSelected?.date;
+      const reminder: Reminder | undefined = date
+        ? {
+            remindAt: date,
+          }
+        : undefined;
       await addCardContext(
         formData.title,
         formData.description,
         formData.priority,
         Number(formData.columnId),
         new Date(formData.dueDate).toISOString(),
+        reminderSelected ? reminder : undefined,
       );
 
       triggerRefresh();
       setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
+      setReminderSelected(null);
       toast.success('Create new task successfully');
 
       if (onSuccess) onSuccess();
@@ -119,6 +145,18 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
     if (open) onClose();
     else setInternalOpen(false);
     setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
+  };
+
+  // Reminder
+
+  const handleSelectReminder = (option: ReminderOptions) => {
+    const date = option.calculateDate();
+    setReminderSelected({ id: option.id, date: date });
+  };
+
+  const handleClearReminder = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setReminderSelected(null);
   };
 
   const getPriorityIconColor = (val: string) => PRIORITY_OPTIONS.find((p) => p.value === val)?.color || 'text-gray-500';
@@ -169,7 +207,6 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
               />
 
               <button
-                type='button'
                 className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium transition-colors ${
                   formData.dueDate ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-600 hover:bg-gray-100'
                 }`}
@@ -216,13 +253,62 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
               )}
             </div>
 
-            <button
-              type='button'
-              className='flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-gray-600 text-xs font-medium hover:bg-gray-100 transition-colors'
-            >
-              <Clock size={14} />
-              <span>Reminders</span>
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type='button'
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-medium transition-colors outline-0 ring-0 ${
+                    reminderSelected
+                      ? 'border-blue-200 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 text-gray-800 hover:bg-gray-100'
+                  }`}
+                >
+                  <ClockPlus size={14} />
+                  <span>
+                    {reminderSelected
+                      ? reminderSelected.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : 'Reminders'}
+                  </span>
+
+                  {reminderSelected && (
+                    <div onClick={handleClearReminder} className='hover:bg-blue-200 rounded-full p-0.5 ml-1'>
+                      <X size={12} />
+                    </div>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className='bg-white w-50 rounded-md p-2 shadow-lg border border-gray-200 z-[99999]'>
+                {REMINDERS_OPTIONS.map((option) => {
+                  const isSelected = reminderSelected?.id === option.id;
+                  return (
+                    <DropdownMenuItem
+                      key={option.id}
+                      className={`mt-1 cursor-pointer rounded px-2 py-1.5 ${
+                        isSelected ? 'bg-blue-50' : 'hover:bg-gray-100'
+                      }`}
+                      onSelect={() => handleSelectReminder(option)}
+                    >
+                      <div className='w-full flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <AlarmClock className={`h-4 w-4 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
+                          <div className={isSelected ? 'text-blue-700 font-medium' : 'text-gray-700'}>
+                            {option.label}
+                          </div>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                          <span className={`text-xs ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}>
+                            {option.timeLabel}
+                          </span>
+                          {isSelected && <Check size={14} className='text-blue-600' />}
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className='flex items-center justify-between mt-4 pt-3 border-t border-gray-100'>
