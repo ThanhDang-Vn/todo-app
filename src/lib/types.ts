@@ -37,6 +37,7 @@ export interface Card {
   dueTo: string;
   createdAt: string;
   updatedAt: string;
+  completeAt: string;
   columnId?: number | null;
   column?: Column | null;
   reminders?: Reminder[];

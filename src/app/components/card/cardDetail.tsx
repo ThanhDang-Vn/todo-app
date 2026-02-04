@@ -132,7 +132,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
               className='relative flex items-center justify-center w-4 h-4 group/checkbox cursor-pointer'
             >
               <Checkbox
-                className={`peer w-full  h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
+                className={`peer w-full h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
                  ${checkboxColor(card.priority)}`}
               />
               <Check
