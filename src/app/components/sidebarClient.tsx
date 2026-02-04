@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/app/components/ui/sidebar';
-import { Search, Inbox, Calendar, BookUp, CircleQuestionMark } from 'lucide-react';
+import { Search, Inbox, Calendar, BookUp, CircleQuestionMark, ListCheck } from 'lucide-react';
 import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
@@ -37,6 +37,11 @@ const navItems = [
     url: '/upcoming',
     icon: BookUp,
   },
+  {
+    title: 'Completed',
+    url: '/complete', 
+    icon: ListCheck
+  }
 ];
 
 type UserProps = {
