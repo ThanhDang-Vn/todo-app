@@ -40,12 +40,13 @@ export interface Card {
   completeAt: string;
   columnId?: number | null;
   column?: Column | null;
-  reminders?: Reminder[];
+  reminders: Reminder[];
 }
 
 export interface Reminder {
   id?: number;
   remindAt: Date;
+  isSent?: boolean;
   cardId?: number;
   card?: Card | null;
 }

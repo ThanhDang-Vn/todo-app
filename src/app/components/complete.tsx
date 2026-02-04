@@ -42,7 +42,7 @@ export default function CompleteClient() {
 
       {isLoading ? (
         <div className='flex flex-1 min-h-[50vh] w-full items-center justify-center'>
-          <Loader2 className='h-12 w-12 animate-spin text-blue-500' />
+          <Loader2 className='h-12 w-12 animate-spin text-red-500' />
         </div>
       ) : (
         <div className='flex flex-col gap-10 pb-20'>

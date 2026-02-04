@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Column } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { Card, Column, Reminder } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/app/components/ui/dialog';
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { Button } from '@/app/components/ui/button';
@@ -15,7 +15,6 @@ import {
 import {
   CalendarArrowUp,
   Inbox,
-  ChevronDown,
   AlignVerticalSpaceAround,
   Trash2,
   Save,
@@ -23,10 +22,16 @@ import {
   CalendarFold,
   Flag,
   Check,
+  Plus,
+  AlarmClockCheck,
+  AlarmClockMinus,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useHandlerContext } from '@/app/context/handler.context';
+import { createReminder } from '@/app/api/reminder';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -62,7 +67,47 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const [description, setDescription] = useState(card.description || '');
   const [isLoading, setIsLoading] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.title);
+
   const { completeCardContext } = useHandlerContext();
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isAddingReminder, setIsAddingReminder] = useState(false); 
+  const [newReminderTime, setNewReminderTime] = useState('');
+  const [isSavingReminder, setIsSavingReminder] = useState(false);
+
+  useEffect(() => {
+    setReminders(card?.reminders || []);
+  }, [card]);
+
+  const handleAddReminder = async () => {
+    if (!newReminderTime) return;
+
+    setIsSavingReminder(true);
+    try {
+      // 1. Call API
+      const createdReminder = await createReminder(newReminderTime, card.id);
+
+      // 2. Update Local State with the result from server (or construct it manually if API doesn't return it)
+      // Assuming createReminder returns the created reminder object:
+      const newReminderObj: Reminder = {
+        remindAt: new Date(newReminderTime),
+        isSent: false,
+        cardId: card.id,
+        // ...spread actual server response if available
+      };
+
+      setReminders((prev) => [...prev, newReminderObj]);
+
+      // 3. Reset UI
+      setNewReminderTime('');
+      setIsAddingReminder(false);
+      toast.success('Reminder set!');
+    } catch (err) {
+      console.error('Failed to create reminder', err);
+      toast.error('Failed to create new reminder');
+    } finally {
+      setIsSavingReminder(false);
+    }
+  };
 
   const handleSave = async () => {
     if (title === card.title && description === card.description) return;
@@ -110,7 +155,6 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const handleColumnChange = async (columnId: number, title: string) => {
     try {
       setColumnTitle(title);
-      console.log(columnId);
       await onUpdate(card.id, { columnId: columnId });
     } catch (err) {
       toast.error('Failed to change column');
@@ -133,7 +177,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
             >
               <Checkbox
                 className={`peer w-full h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
-                 ${checkboxColor(card.priority)}`}
+                ${checkboxColor(card.priority)}`}
               />
               <Check
                 size={14}
@@ -183,7 +227,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
               >
                 <Checkbox
                   className={`peer w-full  h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
-                 ${checkboxColor(card.priority)}`}
+                  ${checkboxColor(card.priority)}`}
                 />
                 <Check
                   size={16}
@@ -276,7 +320,6 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
             <div className='space-y-4 mt-1'>
               <div className='text-xs font-sans font-semibold text-gray-500 ml-2'>Priority</div>
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className='w-full border-0 bg-gray-50 hover:bg-gray-200 py-1 px-2 rounded-md'>
@@ -286,8 +329,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
                     </div>
                   </div>
                 </DropdownMenuTrigger>
-
-                <DropdownMenuContent className='w-[200px] border-1 border-gray-200' align='start'>
+                <DropdownMenuContent className='w-[200px] border-1 border-gray-200 bg-white' align='start'>
                   {priorityOptions.map((option) => (
                     <DropdownMenuItem
                       key={option.value}
@@ -298,12 +340,78 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
                         <Flag size={12} className={`${option.color} ${option.fill}`} />
                         <span className='text-xs text-gray-700'>{option.label}</span>
                       </div>
-
                       {card.priority === option.value && <Check size={16} className='text-gray-600' />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+
+            <div className='border-t border-0.5 border-gray-200' />
+
+            <div className='space-y-2 mt-1'>
+              <div className='flex items-center justify-between w-full p-2'>
+                <p className='text-xs font-sans font-semibold text-gray-500'>Reminders</p>
+                {!isAddingReminder && (
+                  <button
+                    onClick={() => setIsAddingReminder(true)}
+                    className='hover:bg-gray-200 rounded p-0.5 text-gray-500 transition-colors'
+                  >
+                    <Plus size={15} />
+                  </button>
+                )}
+              </div>
+
+              {isAddingReminder && (
+                <div className='bg-white border border-gray-200 rounded-md p-2 mx-1 shadow-sm space-y-2 animate-in fade-in slide-in-from-top-1'>
+                  <input
+                    type='datetime-local'
+                    className='w-full text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400'
+                    value={newReminderTime}
+                    onChange={(e) => setNewReminderTime(e.target.value)}
+                    autoFocus
+                  />
+                  <div className='flex justify-end gap-2'>
+                    <button
+                      onClick={() => {
+                        setIsAddingReminder(false);
+                        setNewReminderTime('');
+                      }}
+                      className='text-[10px] text-gray-500 hover:text-gray-700 px-2 py-1'
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddReminder}
+                      disabled={!newReminderTime || isSavingReminder}
+                      className='bg-gray-900 text-white text-[10px] px-2 py-1 rounded hover:bg-black disabled:opacity-50 flex items-center gap-1'
+                    >
+                      {isSavingReminder && <Loader2 size={10} className='animate-spin' />}
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+              {reminders.length > 0 && (
+                <div className='flex flex-col px-2 items-center gap-1'>
+                  {reminders.map((reminder: Reminder, index) => (
+                    <div
+                      key={`${reminder.remindAt}_${index}`}
+                      className='flex items-center w-full justify-between bg-white border border-gray-100 rounded-md p-2 shadow-sm'
+                    >
+                      <div className='flex items-center gap-2'>
+                        {reminder.isSent ? (
+                          <AlarmClockCheck size={14} className='text-green-600' />
+                        ) : (
+                          <AlarmClockMinus size={14} className='text-orange-500' />
+                        )}
+                        <div className='text-xs text-gray-700 font-medium'> {formatDate(reminder.remindAt)} </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
