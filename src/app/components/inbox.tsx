@@ -24,11 +24,14 @@ import { deleteCard, updateCard } from '../api/card';
 import { getSession } from '@/lib/session';
 import ConfirmModal from './modal/confirm';
 import { useHandlerContext } from '../context/handler.context';
+import { useSidebar } from '@/app/components/ui/sidebar';
 
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
+
+  const { open } = useSidebar();
 
   const {
     columns,
@@ -83,10 +86,12 @@ export default function InboxClient() {
   );
 
   return (
-    <div className='flex flex-col pt-2 pl-10 h-full'>
-      <div className='flex items-center gap-10'>
-        <h5 className='text-2xl font-semibold'>Inbox</h5>
-        <CreateColumn onCreate={handleCreateColumn} />
+    <div className='flex flex-col pt-2 pl-10 h-full overflow-y-hidden'>
+      <div className='flex items-center justify-between w-full gap-10 border-b border-gray-300 pb-4 mb-4'>
+        <div>
+          <h5 className='text-2xl font-semibold'>Inbox</h5>
+          <p className='text-sm text-gray-600'>Stay updated with important messages and activity</p>
+        </div>
       </div>
 
       {isLoading && (
@@ -95,7 +100,7 @@ export default function InboxClient() {
         </div>
       )}
 
-      <div className='h-full overflow-x-auto custom-scrollbar'>
+      <div className='overflow-x-auto custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {columns.map((col: Column) => (
@@ -144,7 +149,7 @@ export default function InboxClient() {
                   </DropdownMenu>
                 </div>
 
-                <div className='flex-1 overflow-y-auto max-h-150 pr-3 space-y-3 pb-2 custom-scrollbar'>
+                <div className='flex-1 overflow-y-auto max-h-142 pr-3 space-y-3 pb-2 custom-scrollbar'>
                   {col?.cards &&
                     col?.cards.map((c: Card) => (
                       <CardItem
@@ -159,6 +164,10 @@ export default function InboxClient() {
                 </div>
               </div>
             ))}
+
+            <div className='w-[20rem] flex-shrink-0 pr-10'>
+              <CreateColumn onCreate={handleCreateColumn} />
+            </div>
 
             <div className='flex flex-col gap-4 w-[18rem]' />
           </div>
