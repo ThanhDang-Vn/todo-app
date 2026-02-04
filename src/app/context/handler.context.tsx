@@ -6,7 +6,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
 import { completeCard, createCard, deleteCard, updateCard } from '../api/card';
-import { Button } from '../components/ui/button';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 
 interface HandlerContextType {

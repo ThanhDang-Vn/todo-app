@@ -8,7 +8,7 @@ export const createCard = async (data: {
   due_to: string;
   description?: string;
   columnId: number;
-  reminders?: Reminder[]
+  reminders?: Reminder[];
 }) => {
   try {
     const res = await api.post(`${BACKEND_URL}/cards`, data);
@@ -20,17 +20,27 @@ export const createCard = async (data: {
   }
 };
 
+export const getAllCompletedCard = async () => {
+  try {
+    const res = await api.get('cards/complete');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const completeCard = async (cardId: number) => {
   try {
-    const res = await api.put(`cards/${cardId}/complete`); 
+    const res = await api.put(`cards/${cardId}/complete`);
     const data = res.data;
 
-    return data; 
+    return data;
   } catch (err) {
-    console.error(err); 
-    throw err; 
+    console.error(err);
+    throw err;
   }
-}
+};
 
 export const updateCard = async (cardId: number, data: Partial<Card>) => {
   try {
