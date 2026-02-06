@@ -57,8 +57,8 @@ interface CardItemProps {
   card: Card;
   column: Column;
   allColumns: { id: string; title: string }[];
-  onUpdate: (cardId: number, data: Partial<Card>) => Promise<void>;
-  onDelete: (cardId: number) => Promise<void>;
+  onUpdate: (cardId: string, data: Partial<Card>) => Promise<void>;
+  onDelete: (cardId: string) => Promise<void>;
 }
 
 export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardItemProps) {
@@ -83,21 +83,16 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
     setIsSavingReminder(true);
     try {
-      // 1. Call API
       const createdReminder = await createReminder(newReminderTime, card.id);
 
-      // 2. Update Local State with the result from server (or construct it manually if API doesn't return it)
-      // Assuming createReminder returns the created reminder object:
       const newReminderObj: Reminder = {
         remindAt: new Date(newReminderTime),
         isSent: false,
         cardId: card.id,
-        // ...spread actual server response if available
       };
 
       setReminders((prev) => [...prev, newReminderObj]);
 
-      // 3. Reset UI
       setNewReminderTime('');
       setIsAddingReminder(false);
       toast.success('Reminder set!');
@@ -124,7 +119,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
     }
   };
 
-  const handleCompleteCard = async (cardId: number) => {
+  const handleCompleteCard = async (cardId: string) => {
     await completeCardContext(cardId);
   };
 
@@ -152,7 +147,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
     }
   };
 
-  const handleColumnChange = async (columnId: number, title: string) => {
+  const handleColumnChange = async (columnId: string, title: string) => {
     try {
       setColumnTitle(title);
       await onUpdate(card.id, { columnId: columnId });
@@ -295,7 +290,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
                       <DropdownMenuItem
                         key={col.id}
                         className='gap-2 cursor-pointer text-xs text-gray-500 h-8 hover:bg-gray-100'
-                        onSelect={() => handleColumnChange(Number(col.id), col.title)}
+                        onSelect={() => handleColumnChange(col.id, col.title)}
                       >
                         <AlignVerticalSpaceAround size={12} />
                         {col.title}

@@ -23,7 +23,7 @@ export const getAllColumns = async () => {
   }
 };
 
-export const duplicateColumn = async (columnId: number) => {
+export const duplicateColumn = async (columnId: string) => {
   try {
     const res = await api.post(`columns/${columnId}/duplicate`);
 
@@ -35,7 +35,7 @@ export const duplicateColumn = async (columnId: number) => {
   }
 };
 
-export const deleteColumn = async (columnId: number) => {
+export const deleteColumn = async (columnId: string) => {
   try {
     const res = await api.delete(`columns/${columnId}`);
     const data = await res.data;
