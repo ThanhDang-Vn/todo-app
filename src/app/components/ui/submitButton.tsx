@@ -4,7 +4,7 @@ import { Button } from './button';
 import { useFormStatus } from 'react-dom';
 import { Loader } from 'lucide-react';
 
-const SubmitButton = ({ children }: PropsWithChildren) => {
+const SubmitButton = ({ children }: React.ComponentProps<typeof Button>) => {
   const { pending } = useFormStatus();
 
   return (
@@ -13,7 +13,7 @@ const SubmitButton = ({ children }: PropsWithChildren) => {
       aria-disabled={pending}
       disabled={pending}
       className='flex items-center bg-black border text-white font-semibold transition-transform duration-150 ease-in-out 
-  active:scale-95 w-100'
+  active:scale-95 w-full justify-center'
     >
       {pending && <Loader className='h-4 w-4 animate-spin' />}
       {pending ? 'Submitting...' : children}
