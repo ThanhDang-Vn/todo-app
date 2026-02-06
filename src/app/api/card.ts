@@ -7,10 +7,11 @@ export const createCard = async (data: {
   priority?: string;
   due_to: string;
   description?: string;
-  columnId: number;
+  columnId: string;
   reminders?: Reminder[];
 }) => {
   try {
+    console.log(data);
     const res = await api.post(`${BACKEND_URL}/cards`, data);
 
     return res.data;
@@ -30,7 +31,7 @@ export const getAllCompletedCard = async () => {
   }
 };
 
-export const completeCard = async (cardId: number) => {
+export const completeCard = async (cardId: string) => {
   try {
     const res = await api.put(`cards/${cardId}/complete`);
     const data = res.data;
@@ -42,7 +43,7 @@ export const completeCard = async (cardId: number) => {
   }
 };
 
-export const updateCard = async (cardId: number, data: Partial<Card>) => {
+export const updateCard = async (cardId: string, data: Partial<Card>) => {
   try {
     const res = await api.put(`${BACKEND_URL}/cards/${cardId}`, data);
 
@@ -53,7 +54,7 @@ export const updateCard = async (cardId: number, data: Partial<Card>) => {
   }
 };
 
-export const deleteCard = async (cardId: number) => {
+export const deleteCard = async (cardId: string) => {
   try {
     const res = await api.delete(`${BACKEND_URL}/cards/${cardId}`);
 

@@ -1,6 +1,4 @@
 'use client';
-
-import { createCard } from '@/app/api/card';
 import { useHandlerContext } from '@/app/context/handler.context';
 import { useRefresh } from '@/app/context/refresh.context';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
@@ -20,8 +18,7 @@ import {
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { DropdownMenuCheckboxItem, DropdownMenuGroup, DropdownMenuItem } from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Reminder, ReminderOptions } from '@/lib/types';
 import { REMINDERS_OPTIONS } from '@/lib/constant';
 
@@ -54,7 +51,7 @@ const PRIORITY_OPTIONS = [
   { value: '4', label: 'Priority 4', color: 'text-gray-500', bg: 'hover:bg-gray-50' },
 ];
 
-export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose, trigger }: CreateCardProps) {
+export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose }: CreateCardProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ? open : internalOpen;
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +119,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
         formData.title,
         formData.description,
         formData.priority,
-        Number(formData.columnId),
+        formData.columnId,
         new Date(formData.dueDate).toISOString(),
         reminderSelected ? reminder : undefined,
       );

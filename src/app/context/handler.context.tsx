@@ -13,19 +13,19 @@ interface HandlerContextType {
   isLoading: boolean;
   fetchColumns: () => Promise<void>;
   addColumn: (title: string) => Promise<void>;
-  duplicateColumnContext: (column: Column, columnId: number, order: number) => Promise<void>;
-  updateCardContext: (cardId: number, data: Partial<Card>) => Promise<void>;
+  duplicateColumnContext: (column: Column, columnId: string, order: number) => Promise<void>;
+  updateCardContext: (cardId: string, data: Partial<Card>) => Promise<void>;
   addCardContext: (
     title: string,
     description: string,
     priority: string,
-    columnId: number,
+    columnId: string,
     due_to: string,
     reminder: Reminder | undefined,
   ) => Promise<void>;
-  completeCardContext: (cardId: number) => Promise<void>;
-  deleteCardContext: (cardId: number) => Promise<void>;
-  deleteColumnContext: (ColumnId: number) => Promise<void>;
+  completeCardContext: (cardId: string) => Promise<void>;
+  deleteCardContext: (cardId: string) => Promise<void>;
+  deleteColumnContext: (ColumnId: string) => Promise<void>;
 }
 
 const HandlerContext = createContext<HandlerContextType | undefined>(undefined);
@@ -54,7 +54,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addColumn = async (title: string) => {
     if (!title.trim()) return;
 
-    const tempId = Date.now() + Math.random();
+    const tempId = (Date.now() + Math.random()).toString();
 
     const optimisticColumn: Column = {
       id: tempId,
@@ -83,7 +83,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const completeCardContext = async (cardId: number) => {
+  const completeCardContext = async (cardId: string) => {
     const prev = [...columns];
 
     setColumns((prevCols) =>
@@ -144,12 +144,12 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, 3000);
   };
 
-  const duplicateColumnContext = async (column: Column, columnId: number, order: number) => {
+  const duplicateColumnContext = async (column: Column, columnId: string, order: number) => {
     const prev = [...columns];
 
     const columnCopy = {
       ...column,
-      id: Math.random() + Date.now(),
+      id: (Math.random() + Date.now()).toString(),
       order: order,
     };
 
@@ -167,7 +167,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const deleteColumnContext = async (columnId: number) => {
+  const deleteColumnContext = async (columnId: string) => {
     const previousColumns = [...columns];
 
     setColumns((prev) => prev.filter((col) => col.id !== columnId));
@@ -186,13 +186,13 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     title: string,
     description: string,
     priority: string,
-    columnId: number,
+    columnId: string,
     due_to: string,
     reminder: Reminder | undefined,
   ) => {
     const prev = [...columns];
 
-    const tempId = Date.now() + Math.random();
+    const tempId = (Date.now() + Math.random()).toString();
 
     const targetColumn = columns.find((c) => c.id === columnId);
     const newOrder =
@@ -261,7 +261,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const updateCardContext = async (cardId: number, data: Partial<Card>) => {
+  const updateCardContext = async (cardId: string, data: Partial<Card>) => {
     const previousColumns = [...columns];
 
     setColumns((prevCols) => {
@@ -322,7 +322,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const deleteCardContext = async (cardId: number) => {
+  const deleteCardContext = async (cardId: string) => {
     const previousColumns = [...columns];
 
     setColumns((prev) =>

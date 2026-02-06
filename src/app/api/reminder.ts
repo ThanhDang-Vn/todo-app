@@ -1,6 +1,6 @@
 import api from '@/lib/axios';
 
-export const createReminder = async (remindAt: string, cardId: number) => {
+export const createReminder = async (remindAt: string, cardId: string) => {
   try {
     const res = await api.post('reminder', {
       remindAt,

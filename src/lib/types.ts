@@ -5,7 +5,7 @@ export enum Role {
 }
 
 export interface User {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -18,18 +18,18 @@ export interface User {
 }
 
 export interface Column {
-  id: number;
+  id: string;
   title: string;
   order?: number;
   createdAt?: Date;
   updatedAt?: Date;
-  userId?: number | null;
+  userId?: string | null;
   user?: User | null;
   cards?: Card[];
 }
 
 export interface Card {
-  id: number;
+  id: string;
   title: string;
   description: string;
   priority: string;
@@ -37,17 +37,17 @@ export interface Card {
   dueTo: string;
   createdAt: string;
   updatedAt: string;
-  completeAt: string;
-  columnId?: number | null;
+  completeAt?: string;
+  columnId?: string | null;
   column?: Column | null;
-  reminders: Reminder[];
+  reminders?: Reminder[];
 }
 
 export interface Reminder {
-  id?: number;
+  id?: string;
   remindAt: Date;
   isSent?: boolean;
-  cardId?: number;
+  cardId?: string;
   card?: Card | null;
 }
 
