@@ -28,7 +28,6 @@ const Login = () => {
         )}
 
         <form action={action} className='space-y-6'>
-          {/* Email Field */}
           <div className='space-y-1'>
             <label htmlFor='email' className='block text-sm font-semibold text-gray-700'>
               Email Address
