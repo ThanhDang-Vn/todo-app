@@ -13,7 +13,7 @@ export type SingUpFormState =
     }
   | undefined;
 
-  export type LoginFormState =
+export type LoginFormState =
   | {
       error?: {
         email?: string[];
@@ -24,7 +24,7 @@ export type SingUpFormState =
     }
   | undefined;
 
-  export type ForgotPasswordFormState =
+export type ForgotPasswordFormState =
   | {
       error?: {
         email?: string[];
@@ -33,11 +33,23 @@ export type SingUpFormState =
     }
   | undefined;
 
-  export type VerifyOtpFormState =
+export type VerifyOtpFormState =
   | {
       error?: {
         email?: string[];
         otp?: string[];
+      };
+
+      message?: string;
+    }
+  | undefined;
+
+export type ResetFormState =
+  | {
+      error?: {
+        token?: string[];
+        password?: string[];
+        confirmPassword?: string[];
       };
 
       message?: string;
@@ -71,3 +83,14 @@ export const VerifyOtpFormSchema = z.object({
   email: z.string().email({ message: 'Please enter your email' }).trim(),
   otp: z.string().length(6, 'OTP must be 6 digits'),
 });
+
+export const ResetPasswordFormSchema = z
+  .object({
+    password: z.string().min(1, { message: 'Password can not be empty' }).trim(),
+    confirmPassword: z.string().min(1, { message: 'Password can not be empty' }).trim(),
+    token: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });

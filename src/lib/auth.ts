@@ -7,6 +7,8 @@ import {
   ForgotPasswordFormState,
   LoginFormSchema,
   LoginFormState,
+  ResetFormState,
+  ResetPasswordFormSchema,
   SignUpFormSchema,
   SingUpFormState,
   VerifyOtpFormSchema,
@@ -167,6 +169,8 @@ export async function verifyOtpForm(state: VerifyOtpFormState, formData: FormDat
     };
   }
 
+  let redirectPath = null;
+
   try {
     const response = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
       method: 'POST',
@@ -176,13 +180,51 @@ export async function verifyOtpForm(state: VerifyOtpFormState, formData: FormDat
       credentials: 'include',
       body: JSON.stringify(validateFormData.data),
     });
-
-    if (response.ok) {
-      const data = await response.json();
-      redirect(`/auth/reset-password?token=${data.token}`);
-    }
+    const data = await response.json();
+    redirectPath = `/auth/reset-password?token=${data.token}`;
   } catch (err) {
     console.error(err);
     throw err;
+  }
+
+  if (redirectPath) {
+    redirect(redirectPath);
+  }
+}
+
+export async function resetPasswordForm(state: ResetFormState, formData: FormData): Promise<ResetFormState> {
+  const password = formData.get('password');
+  const confirmPassword = formData.get('confirmPassword');
+  const token = formData.get('token');
+
+  const validateFormData = ResetPasswordFormSchema.safeParse({
+    password: password,
+    confirmPassword: confirmPassword,
+    token: token,
+  });
+
+  console.log(validateFormData);
+
+  if (!validateFormData.success) {
+    return {
+      error: validateFormData.error.flatten().fieldErrors,
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(validateFormData.data),
+  });
+
+  if (response.ok) {
+    redirect(`/auth/login`);
+  } else {
+    return {
+      message: response.status === 401 ? 'User not exist or password not match' : response.statusText,
+    };
   }
 }
