@@ -1,12 +1,43 @@
 import { z } from 'zod';
 
-export type FormState =
+export type SingUpFormState =
   | {
       error?: {
         firstName?: string[];
         lastName?: string[];
         email?: string[];
         password?: string[];
+      };
+
+      message?: string;
+    }
+  | undefined;
+
+  export type LoginFormState =
+  | {
+      error?: {
+        email?: string[];
+        password?: string[];
+      };
+
+      message?: string;
+    }
+  | undefined;
+
+  export type ForgotPasswordFormState =
+  | {
+      error?: {
+        email?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
+  export type VerifyOtpFormState =
+  | {
+      error?: {
+        email?: string[];
+        otp?: string[];
       };
 
       message?: string;
@@ -30,4 +61,13 @@ export const LoginFormSchema = z.object({
   email: z.string().email({ message: 'Please enter your email' }).trim(),
 
   password: z.string().min(1, { message: 'Password can not be empty' }).trim(),
+});
+
+export const ForgotPasswordFormSchema = z.object({
+  email: z.string().email({ message: 'Please enter your email' }).trim(),
+});
+
+export const VerifyOtpFormSchema = z.object({
+  email: z.string().email({ message: 'Please enter your email' }).trim(),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
 });
