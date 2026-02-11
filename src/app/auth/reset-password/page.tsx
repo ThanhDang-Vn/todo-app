@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
-import { Eye, EyeOff, Check, AlertCircle, ChevronLeft, Lock } from 'lucide-react'; // Import icon từ Lucide
+import { Eye, EyeOff, Check, AlertCircle, ChevronLeft } from 'lucide-react';
 import SubmitButton from '@/app/components/ui/submitButton';
 import { resetPasswordForm } from '@/lib/auth';
 
@@ -23,12 +23,12 @@ export default function ResetPasswordPage() {
           <div className='w-10 h-10 bg-red-50 rounded-full flex items-center justify-center'>
             <AlertCircle className='w-5 h-5 text-red-500' />
           </div>
-          <p className='text-slate-900 font-medium'>Link không hợp lệ hoặc đã hết hạn.</p>
+          <p className='text-slate-900 font-medium'>Invalid or expired link.</p>
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push('/auth/login')}
             className='text-sm text-slate-500 hover:text-slate-900 underline underline-offset-4'
           >
-            Quay về trang chủ
+            Return to Login
           </button>
         </div>
       </div>
@@ -37,23 +37,24 @@ export default function ResetPasswordPage() {
 
   return (
     <div className='flex min-h-screen items-center justify-center bg-slate-50 p-4'>
-      <div className='w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-8'>
-        {/* Header */}
-        <div className='mb-8'>
-          <div className='w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center mb-4 text-slate-700'>
-            <Lock className='w-5 h-5' />
+      <div className='w-full max-w-[540px] bg-white border border-slate-200 rounded-2xl shadow-sm p-8'>
+        <div className='mb-8 text-center'>
+          <div className='flex justify-center items-center gap-1 mb-6'>
+            <div className='p-2 rounded-xl'>
+              <img src='/logo.ico' alt='Todo Deluxe Logo' width={40} height={40} className='block' />
+            </div>
+            <h1 className='text-2xl font-bold text-slate-900 tracking-tight'>Reset Password</h1>
           </div>
-          <h1 className='text-2xl font-bold text-slate-900 tracking-tight'>Đặt lại mật khẩu</h1>
-          <p className='text-sm text-slate-500 mt-2'>Tạo mật khẩu mới đủ mạnh để bảo vệ tài khoản của bạn.</p>
+
+          <p className='text-sm text-slate-500 mt-2'>Create a strong password to protect your account.</p>
         </div>
 
         <form action={action} className='space-y-5'>
           <input type='hidden' name='token' value={token} />
 
-          {/* Input: Mật khẩu mới */}
           <div className='space-y-1.5'>
             <label className='text-sm font-semibold text-slate-700 block' htmlFor='password'>
-              Mật khẩu mới
+              New Password
             </label>
             <div className='relative group'>
               <input
@@ -67,7 +68,7 @@ export default function ResetPasswordPage() {
                 type='button'
                 onClick={() => setShowPass(!showPass)}
                 className='absolute right-0 top-0 h-full px-4 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors'
-                tabIndex={-1} // UX: Tab không nhảy vào icon mắt
+                tabIndex={-1}
               >
                 {showPass ? <EyeOff className='w-5 h-5' /> : <Eye className='w-5 h-5' />}
               </button>
@@ -80,10 +81,9 @@ export default function ResetPasswordPage() {
             )}
           </div>
 
-          {/* Input: Nhập lại mật khẩu */}
           <div className='space-y-1.5'>
             <label className='text-sm font-semibold text-slate-700 block' htmlFor='confirmPassword'>
-              Xác nhận mật khẩu
+              Confirm Password
             </label>
             <div className='relative group'>
               <input
@@ -118,7 +118,7 @@ export default function ResetPasswordPage() {
           )}
 
           <SubmitButton className='w-full h-11 rounded-xl text-base font-medium bg-slate-900 hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 mt-2'>
-            Xác nhận đổi mật khẩu
+            Reset Password
           </SubmitButton>
 
           <div className='text-center pt-2'>
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
               className='inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium group'
             >
               <ChevronLeft className='w-4 h-4 transition-transform group-hover:-translate-x-1' />
-              Quay lại đăng nhập
+              Back to Login
             </button>
           </div>
         </form>
