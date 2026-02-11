@@ -112,3 +112,13 @@ body {
 .animate-jelly {
   animation: jelly 0.4s ease-in-out;
 }
+
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+input[type='password']::-webkit-password-reveal-button {
+  display: none;
+  -webkit-appearance: none;
+}
