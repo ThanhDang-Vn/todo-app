@@ -5,7 +5,6 @@ export async function GET(_req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) {
-      // return 204 No Content so client knows there's no active session
       return NextResponse.json(null, { status: 204 });
     }
 

@@ -14,21 +14,16 @@ import { useMemo, useState } from 'react';
 
 import { Copy, Archive, Trash2, Ellipsis, PackagePlus, Loader2 } from 'lucide-react';
 import { CreateColumn } from '@/app/components/column/createColumn';
-import { createColumn, deleteColumn, getAllColumns } from '../api/column';
 import { Card, Column } from '@/lib/types';
-import { useRefresh } from '../context/refresh.context';
 import { CreateCard } from './card/createCard';
-import { toast } from 'sonner';
 import { CardItem } from './card/cardDetail';
-import { deleteCard, updateCard } from '../api/card';
-import { getSession } from '@/lib/session';
 import ConfirmModal from './modal/confirm';
 import { useHandlerContext } from '../context/handler.context';
 import { useSidebar } from '@/app/components/ui/sidebar';
 
 export default function InboxClient() {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
-  const [columnToDelete, setColumnToDelete] = useState<number | null>(null);
+  const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
 
   const { open } = useSidebar();
@@ -47,18 +42,18 @@ export default function InboxClient() {
     await addColumn(title);
   };
 
-  const handleDuplicateColumn = async (column: Column, columnId: number) => {
+  const handleDuplicateColumn = async (column: Column, columnId: string) => {
     if (!column) return;
     const nearColumn = columns.find((col) => col.order! > column.order!);
     const order = nearColumn ? (column.order! + nearColumn.order!) / 2 : column.order! + 10000;
     await duplicateColumnContext(column, columnId, order);
   };
 
-  const handleUpdateCard = async (cardId: number, data: Partial<Card>) => {
+  const handleUpdateCard = async (cardId: string, data: Partial<Card>) => {
     await updateCardContext(cardId, data);
   };
 
-  const handleDeleteCard = async (cardId: number) => {
+  const handleDeleteCard = async (cardId: string) => {
     await deleteCardContext(cardId);
   };
 
@@ -71,7 +66,7 @@ export default function InboxClient() {
     await deleteColumnContext(columnToDelete);
   };
 
-  const OpenModalDelete = (columnId: number) => {
+  const OpenModalDelete = (columnId: string) => {
     setColumnToDelete(columnId);
     setModalDeleteColumn(true);
   };
