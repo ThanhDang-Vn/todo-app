@@ -1,13 +1,5 @@
-import { getSession } from '@/lib/session';
 import { SidebarClient } from './sidebarClient';
 
-export async function AppSidebar() {
-  const session = await getSession();
-  const userData = {
-    name: session?.user.name,
-    email: session?.user.email,
-    avatar: '/avatars/shadcn.jpg',
-  };
-
-  return <SidebarClient user={userData} />;
+export function AppSidebar() {
+  return <SidebarClient />;
 }

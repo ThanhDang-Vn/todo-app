@@ -8,6 +8,7 @@ export type session = {
     id: string;
     name: string;
     email: string;
+    avatar?: string;
   };
   accessToken: string;
   refreshToken: string;

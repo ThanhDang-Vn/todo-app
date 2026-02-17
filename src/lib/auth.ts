@@ -15,7 +15,6 @@ import {
   VerifyOtpFormState,
 } from './validateType';
 import { createSession } from './session';
-import { email } from 'zod';
 
 export async function SignUpForm(state: SingUpFormState, formData: FormData): Promise<SingUpFormState> {
   const validateFormField = SignUpFormSchema.safeParse({
@@ -73,11 +72,14 @@ export async function loginForm(state: LoginFormState, formData: FormData): Prom
   if (response.ok) {
     const result = await response.json();
 
+    console.log('auth', result);
+
     await createSession({
       user: {
         id: result.id,
         name: result.name,
         email: result.email,
+        avatar: result.avatarUrl,
       },
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
