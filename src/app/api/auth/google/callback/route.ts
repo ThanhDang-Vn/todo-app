@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       id: userId,
       name: firstName + lastName,
       email: email,
+      
     },
     accessToken: accessToken,
     refreshToken: refreshToken,

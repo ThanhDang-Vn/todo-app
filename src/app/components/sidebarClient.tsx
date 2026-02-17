@@ -15,6 +15,7 @@ import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
 import { useMemo } from 'react';
 import { useHandlerContext } from '../context/handler.context';
+import { useUserContext } from '../context/user.context';
 
 const navItems = [
   {
@@ -39,22 +40,15 @@ const navItems = [
   },
   {
     title: 'Completed',
-    url: '/complete', 
-    icon: ListCheck
-  }
+    url: '/complete',
+    icon: ListCheck,
+  },
 ];
 
-type UserProps = {
-  user: {
-    name: string | undefined;
-    email: string | undefined;
-    avatar: string;
-  };
-};
-
-export function SidebarClient({ user }: UserProps) {
+export function SidebarClient() {
   const pathName = usePathname();
   const { columns } = useHandlerContext();
+  const { user } = useUserContext();
 
   const columnOptions = useMemo(
     () =>
@@ -65,10 +59,16 @@ export function SidebarClient({ user }: UserProps) {
     [columns],
   );
 
+  const userInfo = {
+    name: user ? `${user.firstName} ${user.lastName}` : undefined,
+    email: user?.email,
+    avatar: user?.avatarUrl || undefined,
+  };
+
   return (
     <Sidebar className='bg-sidebar'>
       <SidebarHeader>
-        <NavUser user={user} />
+        <NavUser user={userInfo} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className='group-data-[collapsible=icon]:hidden' />

@@ -22,10 +22,11 @@ export function NavUser({
   user: {
     name: string | undefined;
     email: string | undefined;
-    avatar: string;
+    avatar: string | undefined;
   };
 }) {
   const { isMobile } = useSidebar();
+  console.log(user);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
