@@ -59,16 +59,12 @@ export function SidebarClient() {
     [columns],
   );
 
-  const userInfo = {
-    name: user ? `${user.firstName} ${user.lastName}` : undefined,
-    email: user?.email,
-    avatar: user?.avatarUrl || undefined,
-  };
+  // pass entire user object so NavUser/ProfileModal can access id and other fields
 
   return (
     <Sidebar className='bg-sidebar'>
       <SidebarHeader>
-        <NavUser user={userInfo} />
+        <NavUser user={user} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className='group-data-[collapsible=icon]:hidden' />

@@ -1,8 +1,6 @@
 'use client';
 
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
-import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
-import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 import {
   DropdownMenu,
@@ -15,18 +13,16 @@ import {
 } from '@/app/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/app/components/ui/sidebar';
 import { DropdownMenuPortal } from '@radix-ui/react-dropdown-menu';
+import { useState } from 'react';
+import ProfileModal from './profile-modal';
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string | undefined;
-    email: string | undefined;
-    avatar: string | undefined;
-  };
-}) {
-  const { isMobile } = useSidebar();
-  console.log('user: ', user);
+import { User } from '@/lib/types';
+
+export function NavUser({ user }: { user?: User }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const displayName = user ? `${user.firstName} ${user.lastName}`.trim() : undefined;
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -37,14 +33,14 @@ export function NavUser({
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all duration-200 border-0 ring-0 outline-0'
             >
               <Avatar className='h-8 w-8 rounded-lg ring-1 ring-slate-200'>
-                <AvatarImage src={user.avatar || undefined} alt={user.name} className='object-cover' />
+                <AvatarImage src={user?.avatarUrl || undefined} alt={displayName} className='object-cover' />
                 <AvatarFallback className='rounded-lg bg-slate-100 font-medium text-slate-600'>
-                  {user.name?.charAt(0).toUpperCase() || 'U'}
+                  {displayName?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold text-slate-800'>{user.name}</span>
-                <span className='truncate text-xs text-slate-500'>{user.email}</span>
+                <span className='truncate font-semibold text-slate-800'>{displayName}</span>
+                <span className='truncate text-xs text-slate-500'>{user?.email}</span>
               </div>
               <ChevronsUpDown className='ml-auto size-4 text-slate-400' />
             </SidebarMenuButton>
@@ -76,7 +72,10 @@ export function NavUser({
               <DropdownMenuSeparator className='my-1.5 h-px bg-slate-100' />
 
               <DropdownMenuGroup>
-                <DropdownMenuItem className='group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-slate-600 outline-none focus:bg-slate-100 focus:text-slate-900 cursor-pointer transition-colors'>
+                <DropdownMenuItem
+                  onSelect={() => setIsModalOpen(true)}
+                  className='group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-slate-600 outline-none focus:bg-slate-100 focus:text-slate-900 cursor-pointer transition-colors'
+                >
                   <BadgeCheck className='size-4 text-slate-500 group-focus:text-slate-800' />
                   <span>Account</span>
                 </DropdownMenuItem>
@@ -107,6 +106,7 @@ export function NavUser({
           </DropdownMenuPortal>
         </DropdownMenu>
       </SidebarMenuItem>
+      {user && <ProfileModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} currentUser={user} />}
     </SidebarMenu>
   );
 }
