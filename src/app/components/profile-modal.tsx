@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, User as UserIcon, Mail, Save, Loader2, Upload, AlertCircle, Check } from 'lucide-react';
+import { X, User as UserIcon, Mail, Loader2, Upload, AlertCircle, Check } from 'lucide-react';
 import { User } from '@/lib/types';
 import { updateUserProfile, uploadAvatar } from '@/app/api/user';
 import { useUserContext } from '@/app/context/user.context';
@@ -50,27 +50,33 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
       setError('Only JPEG, PNG, and JPG files are allowed');
       return;
     }
 
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       setError('File size must be less than 5MB');
       return;
     }
+
+    const localPreviewUrl = URL.createObjectURL(file);
+    const previousAvatar = avatarUrl;
+    setAvatarUrl(localPreviewUrl);
 
     setIsUploading(true);
     setError(null);
 
     try {
       const result = await uploadAvatar(file);
-      setAvatarUrl(result.avatarUrl || result.secure_url);
+      const newUrl = result.avatarUrl || result.secure_url;
+      setAvatarUrl(newUrl);
+      fetchUser(currentUser.email);
+
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
+      setAvatarUrl(previousAvatar);
       setError('Failed to upload avatar. Please try again.');
       console.error('Avatar upload error:', err);
     } finally {
@@ -149,14 +155,14 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
 
         <form onSubmit={handleSave} className='space-y-8'>
           {error && (
-            <div className='flex items-center gap-3 p-4 rounded-sm bg-red-50 border border-red-200'>
+            <div className='flex items-center gap-3 px-3 py-2 rounded-sm bg-red-50 border border-red-200'>
               <AlertCircle className='w-5 h-5 text-red-600 flex-shrink-0' />
               <p className='text-sm font-medium text-red-800'>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className='flex items-center gap-3 p-4 rounded-lg bg-green-50 border border-green-200'>
+            <div className='flex items-center gap-3 px-3 py-2 rounded-sm bg-green-50 border border-green-200'>
               <div className='flex items-center justify-center w-6 h-6 rounded-full bg-green-600'>
                 <Check className='w-4 h-4 text-white' strokeWidth={3} />
               </div>
@@ -174,19 +180,6 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
                     <UserIcon className='w-12 h-12 text-slate-400' />
                   )}
                 </div>
-
-                <button
-                  type='button'
-                  onClick={handleAvatarClick}
-                  disabled={isUploading}
-                  className='absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center disabled:opacity-50'
-                >
-                  {isUploading ? (
-                    <Loader2 className='w-6 h-6 text-white animate-spin' />
-                  ) : (
-                    <Upload className='w-6 h-6 text-white' />
-                  )}
-                </button>
               </div>
 
               <input
@@ -241,7 +234,7 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
             </div>
           </div>
 
-          <div className='space-y-2 mb-5'>
+          <div className='space-y-2'>
             <label className='text-xs text-slate-700 flex items-center gap-2'>
               <Mail className='w-4 h-4 text-slate-400' />
               Email
@@ -253,6 +246,23 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
               className='w-full h-8 px-4 rounded-sm border border-slate-100 bg-slate-50 text-slate-500 cursor-not-allowed outline-none text-sm font-medium'
             />
             <p className='text-xs text-slate-400 pl-1'>Email address cannot be changed.</p>
+          </div>
+
+          <div className='flex justify-end pt-4 border-t border-slate-100'>
+            <button
+              type='submit'
+              disabled={isLoading || isUploading}
+              className='flex items-center gap-2 px-4 py-2.5 bg-gray-600 text-white text-sm rounded-lg hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className='w-4 h-4 animate-spin' />
+                  Updating...
+                </>
+              ) : (
+                'Update'
+              )}
+            </button>
           </div>
         </form>
       </div>
