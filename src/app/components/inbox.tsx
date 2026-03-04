@@ -95,7 +95,7 @@ export default function InboxClient() {
         </div>
       )}
 
-      <div className='overflow-x-auto custom-scrollbar'>
+      <div className='overflow-x-auto h-full custom-scrollbar'>
         <div className='flex gap-5 px-1 py-4'>
           <div className='px-1 flex justify-start gap-5'>
             {columns.map((col: Column) => (
