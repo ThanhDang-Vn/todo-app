@@ -33,8 +33,6 @@ function InboxBoardContent() {
 
 export default function InboxClient() {
   return (
-    <BoardProvider fetchFn={getAllColumns}>
       <InboxBoardContent />
-    </BoardProvider>
   );
 }

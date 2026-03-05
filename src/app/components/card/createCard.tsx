@@ -21,6 +21,7 @@ import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Reminder, ReminderOptions } from '@/lib/types';
 import { REMINDERS_OPTIONS } from '@/lib/constant';
 import { useBoardContext } from '@/app/context/board.context';
+import { useHandlerContext } from '@/app/context/handler.context';
 
 interface TaskForm {
   title: string;

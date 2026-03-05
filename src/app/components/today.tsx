@@ -32,10 +32,5 @@ function TodayBoardContent() {
 }
 
 export default function TodayClient() {
-  // TODO: Replace getAllColumns with getTodayColumns when API is ready
-  return (
-    <BoardProvider fetchFn={getAllColumns}>
-      <TodayBoardContent />
-    </BoardProvider>
-  );
+  return <TodayBoardContent />;
 }
