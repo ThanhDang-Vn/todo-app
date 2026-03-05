@@ -14,8 +14,8 @@ import { NavUser } from './nav-user';
 import { usePathname } from 'next/navigation';
 import { CreateCard } from './card/createCard';
 import { useMemo } from 'react';
-import { useHandlerContext } from '../context/handler.context';
 import { useUserContext } from '../context/user.context';
+import { useBoardContext } from '../context/board.context';
 
 const navItems = [
   {
@@ -47,7 +47,7 @@ const navItems = [
 
 export function SidebarClient() {
   const pathName = usePathname();
-  const { columns } = useHandlerContext();
+  const { columns } = useBoardContext();
   const { user } = useUserContext();
 
   const columnOptions = useMemo(
