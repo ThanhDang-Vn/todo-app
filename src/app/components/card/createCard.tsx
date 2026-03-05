@@ -1,5 +1,4 @@
 'use client';
-import { useHandlerContext } from '@/app/context/handler.context';
 import { useRefresh } from '@/app/context/refresh.context';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import {
@@ -21,6 +20,7 @@ import { toast } from 'sonner';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Reminder, ReminderOptions } from '@/lib/types';
 import { REMINDERS_OPTIONS } from '@/lib/constant';
+import { useBoardContext } from '@/app/context/board.context';
 
 interface TaskForm {
   title: string;
@@ -59,7 +59,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
 
-  const { addCardContext } = useHandlerContext();
+  const { addCardContext } = useBoardContext();
 
   const [mounted, setMounted] = useState(false);
   const [reminderSelected, setReminderSelected] = useState<{ id: string; date: Date } | null>(null);

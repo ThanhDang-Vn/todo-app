@@ -30,8 +30,8 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useHandlerContext } from '@/app/context/handler.context';
 import { createReminder } from '@/app/api/reminder';
+import { useBoardContext } from '@/app/context/board.context';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -68,9 +68,9 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const [isLoading, setIsLoading] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.title);
 
-  const { completeCardContext } = useHandlerContext();
+  const { completeCardContext } = useBoardContext();
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [isAddingReminder, setIsAddingReminder] = useState(false); 
+  const [isAddingReminder, setIsAddingReminder] = useState(false);
   const [newReminderTime, setNewReminderTime] = useState('');
   const [isSavingReminder, setIsSavingReminder] = useState(false);
 
@@ -401,7 +401,6 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
                         )}
                         <div className='text-xs text-gray-700 font-medium'> {formatDate(reminder.remindAt)} </div>
                       </div>
-
                     </div>
                   ))}
                 </div>

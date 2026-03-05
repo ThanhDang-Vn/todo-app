@@ -5,12 +5,12 @@ import { useMemo } from 'react';
 import { Loader2, CheckCircle2, Clock } from 'lucide-react'; // Import thêm icon
 import { Card } from '@/lib/types';
 import { useCardContext } from '../context/card.context';
-import { useHandlerContext } from '../context/handler.context';
 import { format, parseISO } from 'date-fns';
+import { useBoardContext } from '../context/board.context';
 
 export default function CompleteClient() {
   const { cards } = useCardContext();
-  const { isLoading } = useHandlerContext();
+  const { isLoading } = useBoardContext();
 
   const formatDateTitle = (dateString: string) => {
     try {
