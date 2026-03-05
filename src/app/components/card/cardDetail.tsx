@@ -110,7 +110,6 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
     setIsLoading(true);
     try {
       await onUpdate(card.id, { title, description });
-      toast.success('Updated card successfully');
     } catch (error) {
       toast.error('Failed to update card');
     } finally {

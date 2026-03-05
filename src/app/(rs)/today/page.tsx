@@ -1,9 +1,11 @@
-import React from 'react';
+import InboxClient from '@/app/components/inbox';
+import { getSession } from '@/lib/session';
+import { redirect } from 'next/navigation';
 
-const TodayPage = () => {
-  return <div>
-	Today page
-  </div>;
-};
-
-export default TodayPage;
+export default async function TodayPage() {
+  const session = await getSession();
+  if (!session || !session.user) {
+    redirect('/auth/login');
+  }
+  return <InboxClient />;
+}

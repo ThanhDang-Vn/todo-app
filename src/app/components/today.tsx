@@ -5,7 +5,7 @@ import { Board } from './board';
 import { getAllColumns } from '@/app/api/column';
 import { BoardProvider, useBoardContext } from '../context/board.context';
 
-function InboxBoardContent() {
+function TodayBoardContent() {
   const {
     columns,
     isLoading,
@@ -18,8 +18,8 @@ function InboxBoardContent() {
 
   return (
     <Board
-      title='Inbox'
-      description='Stay updated with important messages and activity'
+      title='Today'
+      description='Tasks scheduled for today, organized by priority'
       columns={columns}
       isLoading={isLoading}
       onAddColumn={addColumn}
@@ -31,10 +31,11 @@ function InboxBoardContent() {
   );
 }
 
-export default function InboxClient() {
+export default function TodayClient() {
+  // TODO: Replace getAllColumns with getTodayColumns when API is ready
   return (
     <BoardProvider fetchFn={getAllColumns}>
-      <InboxBoardContent />
+      <TodayBoardContent />
     </BoardProvider>
   );
 }
