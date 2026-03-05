@@ -32,7 +32,5 @@ function InboxBoardContent() {
 }
 
 export default function InboxClient() {
-  return (
-      <InboxBoardContent />
-  );
+  return <InboxBoardContent />;
 }
