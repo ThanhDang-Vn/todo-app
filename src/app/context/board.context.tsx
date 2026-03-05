@@ -5,7 +5,7 @@ import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
-import { completeCard, createCard, deleteCard, updateCard } from '../api/card';
+import { completeCard, createCard, deleteCard, getAllTodayCard, updateCard } from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -47,7 +47,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       if (pathname.includes('/inbox')) {
         data = await getAllColumns();
       } else if (pathname.includes('/today')) {
-        data = await getAllColumns();
+        data = await getAllTodayCard();
       } else if (pathname.includes('/upcoming')) {
         data = await getAllColumns();
       } else {
@@ -327,8 +327,8 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     });
 
     try {
-      console.log('111');
       await updateCard(cardId, data);
+      toast.success('Updated column successfully');
     } catch (err) {
       console.error(err);
       setColumns(previousColumns);

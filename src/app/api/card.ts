@@ -31,6 +31,16 @@ export const getAllCompletedCard = async () => {
   }
 };
 
+export const getAllTodayCard = async () => {
+  try {
+    const res = await api.get('cards/today');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const completeCard = async (cardId: string) => {
   try {
     const res = await api.put(`cards/${cardId}/complete`);

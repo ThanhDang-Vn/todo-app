@@ -14,6 +14,7 @@ import { Card, Column } from '@/lib/types';
 import { CreateColumn } from './column/createColumn';
 import { CreateCard } from './card/createCard';
 import ConfirmModal from './modal/confirm';
+import { usePathname } from 'next/navigation';
 
 interface BoardProps {
   title: string;
@@ -41,6 +42,8 @@ export function Board({
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
+
+  const path = usePathname();
 
   const handleDuplicateColumn = async (column: Column, columnId: string, order: number) => {
     await onDuplicateColumn(column, columnId, order);
@@ -80,6 +83,8 @@ export function Board({
       })),
     [columns],
   );
+
+  console.log(title);
 
   return (
     <div className='flex flex-col pt-2 pl-10 h-full overflow-y-hidden'>
@@ -161,9 +166,11 @@ export function Board({
               </div>
             ))}
 
-            <div className='w-[20rem] flex-shrink-0 pr-10'>
-              <CreateColumn onCreate={handleCreateColumn} />
-            </div>
+            {path === '/inbox' && (
+              <div className='w-[20rem] flex-shrink-0 pr-10'>
+                <CreateColumn onCreate={handleCreateColumn} />
+              </div>
+            )}
 
             <div className='flex flex-col gap-4 w-[18rem]' />
           </div>
