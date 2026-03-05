@@ -3,10 +3,11 @@
 
 import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, duplicateColumn } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
 import { completeCard, createCard, deleteCard, updateCard } from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 interface BoardContextType {
   columns: Column[];
@@ -32,17 +33,26 @@ const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
 interface BoardProviderProps {
   children: React.ReactNode;
-  fetchFn: () => Promise<Column[]>;
 }
 
-export const BoardProvider: React.FC<BoardProviderProps> = ({ children, fetchFn }) => {
+export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
+  const pathname = usePathname();
   const [columns, setColumns] = useState<Column[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchColumns = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await fetchFn();
+      let data;
+      if (pathname.includes('/inbox')) {
+        data = await getAllColumns();
+      } else if (pathname.includes('/today')) {
+        data = await getAllColumns();
+      } else if (pathname.includes('/upcoming')) {
+        data = await getAllColumns();
+      } else {
+        return;
+      }
       const sortedData = Array.isArray(data) ? data.sort((a: any, b: any) => a.order - b.order) : [];
       setColumns(sortedData);
     } catch (error) {
@@ -50,7 +60,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children, fetchFn 
     } finally {
       setIsLoading(false);
     }
-  }, [fetchFn]);
+  }, [pathname]);
 
   useEffect(() => {
     fetchColumns();

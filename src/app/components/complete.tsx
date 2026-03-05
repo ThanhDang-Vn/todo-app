@@ -1,16 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-
-import { useMemo } from 'react';
-import { Loader2, CheckCircle2, Clock } from 'lucide-react'; // Import thêm icon
+import { Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { useCardContext } from '../context/card.context';
 import { format, parseISO } from 'date-fns';
-import { useBoardContext } from '../context/board.context';
+import { useHandlerContext } from '../context/handler.context';
 
 export default function CompleteClient() {
   const { cards } = useCardContext();
-  const { isLoading } = useBoardContext();
+  const { isLoading } = useHandlerContext();
 
   const formatDateTitle = (dateString: string) => {
     try {

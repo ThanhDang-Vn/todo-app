@@ -16,6 +16,7 @@ import { CreateCard } from './card/createCard';
 import { useMemo } from 'react';
 import { useUserContext } from '../context/user.context';
 import { useBoardContext } from '../context/board.context';
+import { useHandlerContext } from '../context/handler.context';
 
 const navItems = [
   {
@@ -58,8 +59,6 @@ export function SidebarClient() {
       })),
     [columns],
   );
-
-  // pass entire user object so NavUser/ProfileModal can access id and other fields
 
   return (
     <Sidebar className='bg-sidebar'>
