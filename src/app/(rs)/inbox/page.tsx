@@ -1,6 +1,4 @@
-// file: src/app/inbox/page.tsx
 import InboxClient from '@/app/components/inbox';
-import { useUserContext } from '@/app/context/user.context';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 

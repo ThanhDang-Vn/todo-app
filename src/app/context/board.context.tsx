@@ -3,12 +3,12 @@
 
 import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn } from '../api/column';
 import { toast } from 'sonner';
 import { completeCard, createCard, deleteCard, updateCard } from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 
-interface HandlerContextType {
+interface BoardContextType {
   columns: Column[];
   isLoading: boolean;
   fetchColumns: () => Promise<void>;
@@ -28,16 +28,21 @@ interface HandlerContextType {
   deleteColumnContext: (ColumnId: string) => Promise<void>;
 }
 
-const HandlerContext = createContext<HandlerContextType | undefined>(undefined);
+const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
-export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface BoardProviderProps {
+  children: React.ReactNode;
+  fetchFn: () => Promise<Column[]>;
+}
+
+export const BoardProvider: React.FC<BoardProviderProps> = ({ children, fetchFn }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchColumns = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await getAllColumns();
+      const data = await fetchFn();
       const sortedData = Array.isArray(data) ? data.sort((a: any, b: any) => a.order - b.order) : [];
       setColumns(sortedData);
     } catch (error) {
@@ -45,7 +50,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchFn]);
 
   useEffect(() => {
     fetchColumns();
@@ -341,7 +346,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <HandlerContext.Provider
+    <BoardContext.Provider
       value={{
         columns,
         isLoading,
@@ -356,14 +361,14 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }}
     >
       {children}
-    </HandlerContext.Provider>
+    </BoardContext.Provider>
   );
 };
 
-export const useHandlerContext = () => {
-  const context = useContext(HandlerContext);
+export const useBoardContext = () => {
+  const context = useContext(BoardContext);
   if (!context) {
-    throw new Error('useHandlerContext must be used within a HandlerProvider');
+    throw new Error('useBoardContext must be used within a BoardProvider');
   }
   return context;
 };
