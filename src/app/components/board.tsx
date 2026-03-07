@@ -84,8 +84,6 @@ export function Board({
     [columns],
   );
 
-  console.log(title);
-
   return (
     <div className='flex flex-col pt-2 pl-10 h-full overflow-y-hidden'>
       <div className='flex items-center justify-between w-full gap-10 border-b border-gray-300 pb-4 mb-4'>
