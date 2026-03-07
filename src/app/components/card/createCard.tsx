@@ -5,7 +5,6 @@ import {
   CirclePlus,
   Flag,
   Calendar,
-  Clock,
   MoreHorizontal,
   Inbox,
   ChevronDown,
@@ -19,7 +18,7 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Reminder, ReminderOptions } from '@/lib/types';
-import { REMINDERS_OPTIONS } from '@/lib/constant';
+import { PRIORITY_OPTIONS, REMINDERS_OPTIONS } from '@/lib/constant';
 import { useBoardContext } from '@/app/context/board.context';
 import { useHandlerContext } from '@/app/context/handler.context';
 
@@ -44,13 +43,6 @@ interface CreateCardProps {
   onClose: () => void;
   trigger?: ReactNode;
 }
-
-const PRIORITY_OPTIONS = [
-  { value: '1', label: 'Priority 1', color: 'text-red-600', bg: 'hover:bg-red-50' },
-  { value: '2', label: 'Priority 2', color: 'text-orange-500', bg: 'hover:bg-orange-50' },
-  { value: '3', label: 'Priority 3', color: 'text-blue-500', bg: 'hover:bg-blue-50' },
-  { value: '4', label: 'Priority 4', color: 'text-gray-500', bg: 'hover:bg-gray-50' },
-];
 
 export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose }: CreateCardProps) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -126,7 +118,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
       );
 
       triggerRefresh();
-      setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: currentColumnId });
+      setFormData({ title: '', description: '', dueDate: '', priority: '4', columnId: '' });
       setReminderSelected(null);
       toast.success('Create new task successfully');
 

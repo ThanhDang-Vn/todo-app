@@ -32,6 +32,7 @@ import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { createReminder } from '@/app/api/reminder';
 import { useBoardContext } from '@/app/context/board.context';
+import { PRIORITY_OPTIONS } from '@/lib/constant';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -45,13 +46,6 @@ const checkboxColor = (priority: string) => {
       return 'outline-gray-400 bg-gray-100';
   }
 };
-
-const priorityOptions = [
-  { value: '1', label: 'Priority 1', short: 'P1', color: 'text-red-600', fill: 'fill-red-600' },
-  { value: '2', label: 'Priority 2', short: 'P2', color: 'text-orange-500', fill: 'fill-orange-500' },
-  { value: '3', label: 'Priority 3', short: 'P3', color: 'text-blue-600', fill: 'fill-blue-600' },
-  { value: '4', label: 'Priority 4', short: 'P4', color: 'text-gray-500', fill: 'fill-transparent' },
-];
 
 interface CardItemProps {
   card: Card;
@@ -155,7 +149,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
     }
   };
 
-  const currentPriority = priorityOptions.find((p) => p.value === card.priority) || priorityOptions[3];
+  const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === card.priority) || PRIORITY_OPTIONS[3];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -324,7 +318,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className='w-[200px] border-1 border-gray-200 bg-white' align='start'>
-                  {priorityOptions.map((option) => (
+                  {PRIORITY_OPTIONS.map((option) => (
                     <DropdownMenuItem
                       key={option.value}
                       onSelect={() => handlePriorityChange(option.value)}
