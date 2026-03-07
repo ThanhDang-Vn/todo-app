@@ -21,6 +21,16 @@ export const createCard = async (data: {
   }
 };
 
+export const getAllInboxCard = async () => {
+  try {
+    const res = await api.get('cards/inbox');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const getAllCompletedCard = async () => {
   try {
     const res = await api.get('cards/complete');
