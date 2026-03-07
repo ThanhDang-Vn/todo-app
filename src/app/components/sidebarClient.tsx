@@ -16,7 +16,6 @@ import { CreateCard } from './card/createCard';
 import { useMemo } from 'react';
 import { useUserContext } from '../context/user.context';
 import { useBoardContext } from '../context/board.context';
-import { useHandlerContext } from '../context/handler.context';
 import Link from 'next/link';
 
 const navItems = [
@@ -36,7 +35,7 @@ const navItems = [
     icon: Calendar,
   },
   {
-    title: 'Upcomming',
+    title: 'Upcoming',
     url: '/upcoming',
     icon: BookUp,
   },

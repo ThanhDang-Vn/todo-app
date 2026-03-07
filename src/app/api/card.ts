@@ -31,9 +31,9 @@ export const getAllInboxCard = async () => {
   }
 };
 
-export const getAllCompletedCard = async () => {
+export const getAllTodayCard = async () => {
   try {
-    const res = await api.get('cards/complete');
+    const res = await api.get('cards/today');
     return res.data;
   } catch (err) {
     console.error(err);
@@ -41,9 +41,19 @@ export const getAllCompletedCard = async () => {
   }
 };
 
-export const getAllTodayCard = async () => {
+export const getAllUpcomingCard = async () => {
   try {
-    const res = await api.get('cards/today');
+    const res = await api.get('cards/upcoming');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const getAllCompletedCard = async () => {
+  try {
+    const res = await api.get('cards/complete');
     return res.data;
   } catch (err) {
     console.error(err);

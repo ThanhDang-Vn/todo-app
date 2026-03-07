@@ -29,7 +29,6 @@ export function CreateColumn({ onCreate }: CreateColumnProp) {
       await onCreate(title);
       setIsOpen(false);
       setTitle('');
-      toast.success('Column created successfully');
     } catch (error) {
       console.error('Error creating column:', error);
       toast.error('Failed to create column');

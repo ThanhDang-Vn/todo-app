@@ -5,7 +5,15 @@ import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { createColumn, deleteColumn, duplicateColumn } from '../api/column';
 import { toast } from 'sonner';
-import { completeCard, createCard, deleteCard, getAllInboxCard, getAllTodayCard, updateCard } from '../api/card';
+import {
+  completeCard,
+  createCard,
+  deleteCard,
+  getAllInboxCard,
+  getAllTodayCard,
+  getAllUpcomingCard,
+  updateCard,
+} from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -49,7 +57,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       } else if (pathname.includes('/today')) {
         data = await getAllTodayCard();
       } else if (pathname.includes('/upcoming')) {
-        data = await getAllInboxCard();
+        data = await getAllUpcomingCard();
       } else {
         return;
       }
