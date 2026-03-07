@@ -3,9 +3,17 @@
 
 import { Card, Column, Reminder } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn } from '../api/column';
 import { toast } from 'sonner';
-import { completeCard, createCard, deleteCard, getAllTodayCard, updateCard } from '../api/card';
+import {
+  completeCard,
+  createCard,
+  deleteCard,
+  getAllInboxCard,
+  getAllTodayCard,
+  getAllUpcomingCard,
+  updateCard,
+} from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -45,11 +53,11 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       setIsLoading(true);
       let data;
       if (pathname.includes('/inbox')) {
-        data = await getAllColumns();
+        data = await getAllInboxCard();
       } else if (pathname.includes('/today')) {
         data = await getAllTodayCard();
       } else if (pathname.includes('/upcoming')) {
-        data = await getAllColumns();
+        data = await getAllUpcomingCard();
       } else {
         return;
       }
@@ -245,9 +253,9 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
         description,
         priority,
         columnId,
-        due_to: new Date(due_to).toISOString(),
+        dateDue: new Date(due_to).toISOString(),
         reminders: reminder ? [reminder] : undefined,
-      });
+      }); 
       setColumns((prevCols) => {
         return prevCols.map((col) => {
           if (col.id === columnId) {

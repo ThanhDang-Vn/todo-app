@@ -4,7 +4,7 @@
 import { Board } from './board';
 import { useBoardContext } from '../context/board.context';
 
-function InboxBoardContent() {
+function UpcomingBoardContent() {
   const {
     columns,
     isLoading,
@@ -17,8 +17,8 @@ function InboxBoardContent() {
 
   return (
     <Board
-      title='Inbox'
-      description='Stay updated with important messages and activity'
+      title='Upcoming'
+      description='Tasks scheduled days for a week, organized by priority'
       columns={columns}
       isLoading={isLoading}
       onAddColumn={addColumn}
@@ -30,6 +30,6 @@ function InboxBoardContent() {
   );
 }
 
-export default function InboxClient() {
-  return <InboxBoardContent />;
+export default function UpcomingClient() {
+  return <UpcomingBoardContent />;
 }

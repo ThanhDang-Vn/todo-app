@@ -189,7 +189,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
               <div className='flex items-center gap-2 mt-1'>
                 <div className='flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors bg-gray-50 text-gray-500 group-hover:bg-gray-100'>
                   <CalendarArrowUp size={13} className='opacity-70' />
-                  <span>{formatDate(card.createdAt)}</span>
+                  <span>{formatDate(card.dueTo)}</span>
                 </div>
               </div>
             </div>

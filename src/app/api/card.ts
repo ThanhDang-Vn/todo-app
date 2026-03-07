@@ -5,7 +5,7 @@ import { Card, Reminder } from '@/lib/types';
 export const createCard = async (data: {
   title: string;
   priority?: string;
-  due_to: string;
+  dateDue: string;
   description?: string;
   columnId: string;
   reminders?: Reminder[];
@@ -21,9 +21,9 @@ export const createCard = async (data: {
   }
 };
 
-export const getAllCompletedCard = async () => {
+export const getAllInboxCard = async () => {
   try {
-    const res = await api.get('cards/complete');
+    const res = await api.get('cards/inbox');
     return res.data;
   } catch (err) {
     console.error(err);
@@ -34,6 +34,26 @@ export const getAllCompletedCard = async () => {
 export const getAllTodayCard = async () => {
   try {
     const res = await api.get('cards/today');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const getAllUpcomingCard = async () => {
+  try {
+    const res = await api.get('cards/upcoming');
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const getAllCompletedCard = async () => {
+  try {
+    const res = await api.get('cards/complete');
     return res.data;
   } catch (err) {
     console.error(err);
