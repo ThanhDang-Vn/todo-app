@@ -25,7 +25,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-
   useEffect(() => {
     const loadFromSession = async () => {
       try {

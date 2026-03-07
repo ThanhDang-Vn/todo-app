@@ -17,6 +17,7 @@ import { useMemo } from 'react';
 import { useUserContext } from '../context/user.context';
 import { useBoardContext } from '../context/board.context';
 import { useHandlerContext } from '../context/handler.context';
+import Link from 'next/link';
 
 const navItems = [
   {
@@ -80,7 +81,7 @@ export function SidebarClient() {
             const isActive = item.url === pathName;
             return (
               <SidebarMenuItem key={item.title} className='ml-4 pb-2'>
-                <a
+                <Link
                   href={item.url}
                   className={`
           flex items-center gap-2 mr-5 rounded-lg px-2 py-1
@@ -90,7 +91,7 @@ export function SidebarClient() {
                 >
                   <item.icon size={18} />
                   <span className='text-sm'>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuItem>
             );
           })}

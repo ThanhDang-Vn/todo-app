@@ -11,9 +11,9 @@ import { BoardProvider } from '../context/board.context';
 export default async function RSLayout({ children }: { children: React.ReactNode }) {
   return (
     <RefreshProvider>
-      <HandlerProvider>
-        <BoardProvider>
-          <UserProvider>
+      <UserProvider>
+        <HandlerProvider>
+          <BoardProvider>
             <CardProvider>
               <SidebarProvider>
                 <AppSidebar />
@@ -28,9 +28,9 @@ export default async function RSLayout({ children }: { children: React.ReactNode
                 </SidebarInset>
               </SidebarProvider>
             </CardProvider>
-          </UserProvider>
-        </BoardProvider>
-      </HandlerProvider>
+          </BoardProvider>
+        </HandlerProvider>
+      </UserProvider>
     </RefreshProvider>
   );
 }
