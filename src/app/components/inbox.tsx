@@ -2,8 +2,7 @@
 'use client';
 
 import { Board } from './board';
-import { getAllColumns } from '@/app/api/column';
-import { BoardProvider, useBoardContext } from '../context/board.context';
+import { useBoardContext } from '../context/board.context';
 
 function InboxBoardContent() {
   const {

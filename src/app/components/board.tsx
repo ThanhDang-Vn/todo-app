@@ -165,7 +165,7 @@ export function Board({
             ))}
 
             {path === '/inbox' && (
-              <div className='w-[20rem] flex-shrink-0 pr-10'>
+              <div className='w-[15rem] flex-shrink-0 pr-10'>
                 <CreateColumn onCreate={handleCreateColumn} />
               </div>
             )}
