@@ -253,9 +253,9 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
         description,
         priority,
         columnId,
-        due_to: new Date(due_to).toISOString(),
+        dateDue: new Date(due_to).toISOString(),
         reminders: reminder ? [reminder] : undefined,
-      });
+      }); 
       setColumns((prevCols) => {
         return prevCols.map((col) => {
           if (col.id === columnId) {

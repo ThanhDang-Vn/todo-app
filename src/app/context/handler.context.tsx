@@ -230,7 +230,7 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         description,
         priority,
         columnId,
-        due_to: new Date(due_to).toISOString(),
+        dateDue: new Date(due_to).toISOString(),
         reminders: reminder ? [reminder] : undefined,
       });
       setColumns((prevCols) => {

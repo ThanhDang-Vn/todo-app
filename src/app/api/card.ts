@@ -5,7 +5,7 @@ import { Card, Reminder } from '@/lib/types';
 export const createCard = async (data: {
   title: string;
   priority?: string;
-  due_to: string;
+  dateDue: string;
   description?: string;
   columnId: string;
   reminders?: Reminder[];
