@@ -2,9 +2,9 @@
 'use client';
 
 import { Board } from './board';
-import { useBoardContext } from '../context/board.context';
+import { useBoardContext } from '../../context/board.context';
 
-function TodayBoardContent() {
+function InboxBoardContent() {
   const {
     columns,
     isLoading,
@@ -17,8 +17,8 @@ function TodayBoardContent() {
 
   return (
     <Board
-      title='Today'
-      description='Tasks scheduled for today, organized by priority'
+      title='Inbox'
+      description='Stay updated with important messages and activity'
       columns={columns}
       isLoading={isLoading}
       onAddColumn={addColumn}
@@ -30,6 +30,6 @@ function TodayBoardContent() {
   );
 }
 
-export default function TodayClient() {
-  return <TodayBoardContent />;
+export default function InboxClient() {
+  return <InboxBoardContent />;
 }

@@ -1,4 +1,4 @@
-import InboxClient from '@/app/components/inbox';
+import InboxClient from '@/app/components/feature/inbox';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 

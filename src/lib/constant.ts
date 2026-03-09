@@ -60,3 +60,30 @@ export const REMINDERS_OPTIONS: ReminderOptions[] = [
     },
   },
 ];
+export const PRIORITY_OPTIONS = [
+  { value: '1', label: 'Priority 1', short: 'P1', fill: 'fill-red-600', color: 'text-red-600', bg: 'hover:bg-red-50' },
+  {
+    value: '2',
+    label: 'Priority 2',
+    short: 'P2',
+    fill: 'fill-orange-500',
+    color: 'text-orange-500',
+    bg: 'hover:bg-orange-50',
+  },
+  {
+    value: '3',
+    label: 'Priority 3',
+    short: 'P3',
+    fill: 'fill-blue-600',
+    color: 'text-blue-500',
+    bg: 'hover:bg-blue-50',
+  },
+  {
+    value: '4',
+    label: 'Priority 4',
+    short: 'P4',
+    fill: 'fill-transparent',
+    color: 'text-gray-500',
+    bg: 'hover:bg-gray-50',
+  },
+];

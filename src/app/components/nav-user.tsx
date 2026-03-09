@@ -13,7 +13,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/app/components/ui/sidebar';
 import { DropdownMenuPortal } from '@radix-ui/react-dropdown-menu';
 import { useState } from 'react';
-import ProfileModal from './profile-modal';
+import ProfileModal from './modal/profile-modal';
 
 import { User } from '@/lib/types';
 

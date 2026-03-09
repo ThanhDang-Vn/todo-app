@@ -2,9 +2,9 @@
 'use client';
 import { Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { Card } from '@/lib/types';
-import { useCardContext } from '../context/card.context';
+import { useCardContext } from '../../context/card.context';
 import { format, parseISO } from 'date-fns';
-import { useHandlerContext } from '../context/handler.context';
+import { useHandlerContext } from '../../context/handler.context';
 
 export default function CompleteClient() {
   const { cards } = useCardContext();
