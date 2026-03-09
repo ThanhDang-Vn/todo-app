@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Archive, Copy, Ellipsis, PackagePlus, Trash2, Loader2 } from 'lucide-react';
+import { Archive, Copy, Ellipsis, PackagePlus, Trash2, Loader2, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,7 +108,7 @@ export function Board({
                 className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'
               >
                 <div className='flex items-center justify-between '>
-                  <h1 className='text-base font-medium'>{col.title}</h1>
+                  <h1 className='text-sm font-semibold text-gray-700'>{col.title}</h1>
                   <DropdownMenu>
                     <DropdownMenuTrigger className='focus:outline-0'>
                       <Ellipsis />
@@ -149,8 +149,8 @@ export function Board({
                 </div>
 
                 <div className='flex-1 overflow-y-auto max-h-142 pr-3 space-y-3 pb-2 custom-scrollbar'>
-                  {col?.cards &&
-                    col?.cards.map((c: Card) => (
+                  {col?.cards && col.cards.length > 0 ? (
+                    col.cards.map((c: Card) => (
                       <CardItem
                         key={c.id}
                         card={c}
@@ -159,7 +159,20 @@ export function Board({
                         onUpdate={handleUpdateCard}
                         onDelete={handleDeleteCard}
                       />
-                    ))}
+                    ))
+                  ) : (
+                    <button
+                      onClick={() => setCreatingCardColId(String(col.id))}
+                      className='w-full h-12 border-1 border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-in-out group shadow-sm'
+                    >
+                      <div className='flex items-center justify-center gap-2'>
+                        <div className='p-1 bg-white rounded-full border border-gray-100 shadow-sm group-hover:shadow transition-all'>
+                          <Plus size={15} />
+                        </div>
+                        <span className='text-sm font-medium'>Add new card</span>
+                      </div>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
