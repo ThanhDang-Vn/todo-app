@@ -1,5 +1,5 @@
-import InboxClient from '@/app/components/inbox';
-import TodayClient from '@/app/components/today';
+import InboxClient from '@/app/components/feature/inbox';
+import TodayClient from '@/app/components/feature/today';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 

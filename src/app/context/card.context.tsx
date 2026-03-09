@@ -7,6 +7,7 @@ import { Card } from '@/lib/types';
 
 interface CardContextType {
   cards: { time: string; cards: Card[] }[];
+  fetchCompletedCards: () => Promise<void>;
 }
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
@@ -15,7 +16,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cards, setCards] = useState<{ time: string; cards: Card[] }[]>([]);
   const { columns } = useHandlerContext();
 
-  const fetchCards = async () => {
+  const fetchCompletedCards = async () => {
     try {
       const data = await getAllCompletedCard();
       setCards(data);
@@ -25,17 +26,18 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    fetchCards();
+    fetchCompletedCards();
   }, []);
 
   useEffect(() => {
-    fetchCards();
+    fetchCompletedCards();
   }, [columns]);
 
   return (
     <CardContext.Provider
       value={{
         cards,
+        fetchCompletedCards,
       }}
     >
       {children}

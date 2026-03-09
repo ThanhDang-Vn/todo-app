@@ -107,64 +107,68 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
   };
 
   const completeCardContext = async (cardId: string) => {
-    const prev = [...columns];
+    return new Promise<void>((resolve, reject) => {
+      const prev = [...columns];
 
-    setColumns((prevCols) =>
-      prevCols.map((col) => {
-        return {
-          ...col,
-          cards: col.cards!.filter((card) => card.id !== cardId),
-        };
-      }),
-    );
+      setColumns((prevCols) =>
+        prevCols.map((col) => {
+          return {
+            ...col,
+            cards: col.cards!.filter((card) => card.id !== cardId),
+          };
+        }),
+      );
 
-    let undone = false;
+      let undone = false;
 
-    toast.custom(
-      (t) => (
-        <div className='flex items-center justify-between w-full max-w-md p-4 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50  gap-4'>
-          <div className='flex items-center gap-3'>
-            <div className='flex items-center justify-center w-8 h-8 bg-green-100 rounded-full shrink-0'>
-              <CheckCircle2 size={20} className='text-green-600' />
+      toast.custom(
+        (t) => (
+          <div className='flex items-center justify-between w-full max-w-md p-4 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50  gap-4'>
+            <div className='flex items-center gap-3'>
+              <div className='flex items-center justify-center w-8 h-8 bg-green-100 rounded-full shrink-0'>
+                <CheckCircle2 size={20} className='text-green-600' />
+              </div>
+
+              <div className='flex flex-col'>
+                <span className='text-sm font-semibold text-gray-800 '>Đã hoàn thành</span>
+                <span className='text-xs text-gray-500 dark:text-gray-400 line-clamp-1'>
+                  Task đã được chuyển sang Done
+                </span>
+              </div>
             </div>
 
-            <div className='flex flex-col'>
-              <span className='text-sm font-semibold text-gray-800 '>Đã hoàn thành</span>
-              <span className='text-xs text-gray-500 dark:text-gray-400 line-clamp-1'>
-                Task đã được chuyển sang Done
-              </span>
-            </div>
+            <button
+              onClick={() => {
+                undone = true;
+                setColumns(prev);
+                toast.dismiss(t);
+              }}
+              className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900 transition-colors '
+            >
+              <Undo2 size={14} />
+              Undo
+            </button>
           </div>
+        ),
+        {
+          duration: 4000,
+        },
+      );
 
-          <button
-            onClick={() => {
-              undone = true;
-              setColumns(prev);
-              toast.dismiss(t);
-            }}
-            className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900 transition-colors '
-          >
-            <Undo2 size={14} />
-            Undo
-          </button>
-        </div>
-      ),
-      {
-        duration: 4000,
-      },
-    );
+      setTimeout(async () => {
+        if (undone) return;
 
-    setTimeout(async () => {
-      if (undone) return;
-
-      try {
-        await completeCard(cardId);
-      } catch (err) {
-        console.error(err);
-        setColumns(prev);
-        toast.error('Failed to complete task');
-      }
-    }, 3000);
+        try {
+          await completeCard(cardId);
+          resolve();
+        } catch (err) {
+          console.error(err);
+          setColumns(prev);
+          toast.error('Failed to complete task');
+          resolve();
+        }
+      }, 3000);
+    });
   };
 
   const duplicateColumnContext = async (column: Column, columnId: string, order: number) => {
@@ -255,7 +259,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
         columnId,
         dateDue: new Date(due_to).toISOString(),
         reminders: reminder ? [reminder] : undefined,
-      }); 
+      });
       setColumns((prevCols) => {
         return prevCols.map((col) => {
           if (col.id === columnId) {

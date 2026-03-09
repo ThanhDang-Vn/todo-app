@@ -7,13 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { CardItem } from './card/cardDetail';
+} from '../ui/dropdown-menu';
+import { CardItem } from '../card/cardDetail';
 import { useMemo, useState } from 'react';
 import { Card, Column } from '@/lib/types';
-import { CreateColumn } from './column/createColumn';
-import { CreateCard } from './card/createCard';
-import ConfirmModal from './modal/confirm';
+import { CreateColumn } from '../column/createColumn';
+import { CreateCard } from '../card/createCard';
+import ConfirmModal from '../modal/confirm';
 import { usePathname } from 'next/navigation';
 
 interface BoardProps {

@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import { createReminder } from '@/app/api/reminder';
 import { useBoardContext } from '@/app/context/board.context';
 import { PRIORITY_OPTIONS } from '@/lib/constant';
+import { useCardContext } from '@/app/context/card.context';
 
 const checkboxColor = (priority: string) => {
   switch (priority) {
@@ -63,6 +64,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const [columnTitle, setColumnTitle] = useState(column.title);
 
   const { completeCardContext } = useBoardContext();
+  const { fetchCompletedCards } = useCardContext();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [isAddingReminder, setIsAddingReminder] = useState(false);
   const [newReminderTime, setNewReminderTime] = useState('');
@@ -113,7 +115,12 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   };
 
   const handleCompleteCard = async (cardId: string) => {
-    await completeCardContext(cardId);
+    try {
+      await completeCardContext(cardId);
+      await fetchCompletedCards();
+    } catch (error) {
+      console.error('Lỗi khi hoàn thành card:', error);
+    }
   };
 
   const handleDelete = async () => {

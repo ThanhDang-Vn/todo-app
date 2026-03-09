@@ -1,4 +1,4 @@
-import CompleteClient from '@/app/components/complete';
+import CompleteClient from '@/app/components/feature/complete';
 import { useCardContext } from '@/app/context/card.context';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';

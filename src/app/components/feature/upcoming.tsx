@@ -2,7 +2,7 @@
 'use client';
 
 import { Board } from './board';
-import { useBoardContext } from '../context/board.context';
+import { useBoardContext } from '../../context/board.context';
 
 function UpcomingBoardContent() {
   const {
