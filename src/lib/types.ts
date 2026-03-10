@@ -28,6 +28,11 @@ export interface Column {
   cards?: Card[];
 }
 
+export interface Section {
+  id: string;
+  title: string;
+}
+
 export interface Card {
   id: string;
   title: string;
