@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { Card, Column, Reminder } from '@/lib/types';
+import { Card, Column, Reminder, Section } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, duplicateColumn } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
 import { toast } from 'sonner';
 import {
   completeCard,
@@ -19,6 +19,7 @@ import { usePathname } from 'next/navigation';
 
 interface BoardContextType {
   columns: Column[];
+  sections: Section[];
   isLoading: boolean;
   fetchColumns: () => Promise<void>;
   addColumn: (title: string) => Promise<void>;
@@ -46,7 +47,17 @@ interface BoardProviderProps {
 export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
   const pathname = usePathname();
   const [columns, setColumns] = useState<Column[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchSections = async () => {
+    try {
+      const data = await getAllColumns();
+      setSections(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchColumns = useCallback(async () => {
     try {
@@ -74,8 +85,14 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     fetchColumns();
   }, [fetchColumns]);
 
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
   const addColumn = async (title: string) => {
     if (!title.trim()) return;
+    const prev = [...columns];
+    const prevSections = [...sections];
 
     const tempId = (Date.now() + Math.random()).toString();
 
@@ -90,18 +107,21 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       createdAt: new Date(),
     };
 
-    const previousColumns = [...columns];
-
     setColumns((prev) => [...prev, optimisticColumn]);
+    setSections((prev) => [...prev, { id: optimisticColumn.id, title: optimisticColumn.title }]);
 
     try {
       const newColumn = await createColumn({ title });
 
       setColumns((prev) => prev.map((col) => (col.id === tempId ? newColumn : col)));
+      setSections((prev) =>
+        prev.map((col) => (col.id === newColumn.id ? { id: newColumn.id, title: newColumn.title } : col)),
+      );
       toast.success('Create column successfully');
     } catch (err) {
       console.error(err);
-      setColumns(previousColumns);
+      setColumns(prev);
+      setSections(prevSections);
       toast.error('Failed to create new column');
     }
   };
@@ -173,6 +193,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
 
   const duplicateColumnContext = async (column: Column, columnId: string, order: number) => {
     const prev = [...columns];
+    const prevSections = [...sections];
 
     const columnCopy = {
       ...column,
@@ -181,13 +202,18 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     };
 
     setColumns([...columns, columnCopy].sort((a, b) => a.order! - b.order!));
+    setSections((prev) => [...prev, { id: columnCopy.id, title: columnCopy.title }]);
 
     try {
       const newColumn = await duplicateColumn(columnId);
       setColumns((prevCols) => prevCols.map((col) => (col.id === columnId ? newColumn : col)));
+      setSections((prev) =>
+        prev.map((col) => (col.id === columnId ? { id: columnCopy.id, title: columnCopy.title } : col)),
+      );
       toast.success('Duplication sucessfully');
     } catch (err) {
       setColumns(prev);
+      setSections(prevSections);
       console.error(err);
       toast.error('Failed to duplicate column');
       throw err;
@@ -195,15 +221,18 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
   };
 
   const deleteColumnContext = async (columnId: string) => {
-    const previousColumns = [...columns];
+    const prev = [...columns];
+    const prevSections = [...sections];
 
     setColumns((prev) => prev.filter((col) => col.id !== columnId));
+    setSections((prev) => prev.filter((section) => section.id !== columnId));
 
     try {
       await deleteColumn(columnId);
       toast.success('Delete column successfully');
     } catch (err) {
-      setColumns(previousColumns);
+      setColumns(prev);
+      setSections(prevSections);
       console.error(err);
       toast.error('Failed to delete this column');
     }
@@ -371,6 +400,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     <BoardContext.Provider
       value={{
         columns,
+        sections,
         isLoading,
         fetchColumns,
         addColumn,

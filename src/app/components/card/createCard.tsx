@@ -46,6 +46,7 @@ interface CreateCardProps {
 
 export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose }: CreateCardProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const { sections } = useBoardContext();
   const isOpen = open ? open : internalOpen;
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,10 +70,6 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
     priority: '4',
     columnId: currentColumnId,
   });
-
-  useEffect(() => {
-    console.log(allColumns);
-  }, [allColumns]);
 
   useEffect(() => {
     setMounted(true);
@@ -150,7 +147,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
   };
 
   const getPriorityIconColor = (val: string) => PRIORITY_OPTIONS.find((p) => p.value === val)?.color || 'text-gray-500';
-  const getSelectedColumnName = () => allColumns.find((c) => c.id === formData.columnId)?.title || 'Inbox';
+  const getSelectedColumnName = () => sections.find((c) => c.id === formData.columnId)?.title || 'Inbox';
 
   const modalContent = (
     <div className='fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4'>
@@ -318,7 +315,7 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
                   <div className='px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider'>
                     Select Project
                   </div>
-                  {allColumns.map((col) => (
+                  {sections.map((col) => (
                     <button
                       key={col.id}
                       type='button'
