@@ -3,9 +3,10 @@ import { useRouter } from 'next/navigation';
 import { Calendar, Inbox, CalendarDays, SquareKanban, Columns3, Search, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { searching } from '../api/searching';
+import { Checkbox } from './ui/checkbox';
 
 interface Searching {
-  cards: Array<{ id: string; title: string; columnId?: string }>;
+  cards: Array<{ id: string; title: string; columnId?: string; priority: string; description: string }>;
   columns: Array<{ id: string; title: string }>;
 }
 
@@ -14,6 +15,19 @@ interface SearchCommandProps {
   setOpen: (open: boolean) => void;
 }
 
+const checkboxColor = (priority: string) => {
+  switch (priority) {
+    case '1':
+      return 'outline-red-400 bg-red-100';
+    case '2':
+      return 'outline-orange-400 bg-orange-100';
+    case '3':
+      return 'outline-blue-400 bg-blue-100';
+    default:
+      return 'outline-gray-400 bg-gray-100';
+  }
+};
+
 export function SearchCommand({ open, setOpen }: SearchCommandProps) {
   const router = useRouter();
   const [search, setSearch] = useState('');
@@ -21,7 +35,6 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Lắng nghe phím tắt Ctrl+K để mở
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -33,7 +46,6 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
     return () => document.removeEventListener('keydown', down);
   }, [setOpen]);
 
-  // Lắng nghe phím Esc để đóng
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && open) {
@@ -44,18 +56,15 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
     return () => document.removeEventListener('keydown', down);
   }, [open, setOpen]);
 
-  // Focus vào input mỗi khi modal mở
   useEffect(() => {
     if (open && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 50); // Đợi render xong mới focus
+      setTimeout(() => inputRef.current?.focus(), 50);
     } else if (!open) {
-      // Reset state khi đóng modal
       setSearch('');
       setResults({ cards: [], columns: [] });
     }
   }, [open]);
 
-  // 2. Logic gọi API (Debounce + Ignore Race condition)
   useEffect(() => {
     let ignore = false;
     if (!search.trim()) {
@@ -87,7 +96,6 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
     };
   }, [search]);
 
-  // 3. Hàm thực thi khi click vào một item
   const runCommand = useCallback(
     (command: () => unknown) => {
       setOpen(false);
@@ -96,22 +104,18 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
     [setOpen],
   );
 
-  // Nếu modal không mở, không render gì cả
   if (!open) return null;
 
   return (
-    // Backdrop mờ (Overlay)
     <div
       className='fixed inset-0 z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] bg-black/50 backdrop-blur-sm transition-opacity'
-      onClick={() => setOpen(false)} // Click ra ngoài để đóng
+      onClick={() => setOpen(false)}
     >
-      {/* Modal Container */}
       <div
         className='relative w-full max-w-[700px] overflow-hidden rounded-xl bg-white shadow-2xl border border-gray-200'
-        onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click lan ra overlay
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header: Input Search */}
-        <div className='flex items-center border-b px-3'>
+        <div className='flex items-center border-b border-gray-200 px-3'>
           <Search className='mr-2 h-5 w-5 shrink-0 opacity-50' />
           <input
             ref={inputRef}
@@ -120,28 +124,16 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          {/* Nút Esc nhỏ góc phải */}
           <div className='hidden sm:flex items-center justify-center rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 ml-2'>
             ESC
           </div>
         </div>
 
-        {/* Body: Danh sách kết quả */}
         <div className='max-h-[300px] sm:max-h-[400px] overflow-y-auto p-2'>
-          {/* Trạng thái Loading */}
-          {isLoading && (
-            <div className='flex items-center justify-center p-4 text-sm text-gray-500'>
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-              Đang tìm kiếm...
-            </div>
-          )}
-
-          {/* Trạng thái Không tìm thấy (Empty State) */}
           {!isLoading && search && results.cards.length === 0 && results.columns.length === 0 && (
-            <div className='py-6 text-center text-sm text-gray-500'>Không tìm thấy kết quả nào cho {search}.</div>
+            <div className='py-6 text-center text-sm text-gray-500'>Not found</div>
           )}
 
-          {/* Mặc định: Recently Viewed (Khi chưa search) */}
           {!search && !isLoading && (
             <div className='mb-2'>
               <div className='px-2 py-1.5 text-xs font-semibold text-gray-500'>Recently viewed</div>
@@ -172,7 +164,6 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
             </div>
           )}
 
-          {/* Kết quả: Sections / Columns */}
           {!isLoading && search && results.columns.length > 0 && (
             <div className='mb-2'>
               <div className='px-2 py-1.5 text-xs font-semibold text-gray-500'>Sections / Columns</div>
@@ -189,7 +180,20 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
             </div>
           )}
 
-          {/* Kết quả: Cards */}
+          {isLoading && search && (
+            <div className='mb-2'>
+              {[1, 2, 3].map((item) => (
+                <div key={`skeleton-${item}`} className='flex w-full items-center rounded-md px-2 py-2'>
+                  <div className='w-5 h-5 rounded bg-gray-200 animate-pulse ml-2 shrink-0' />
+                  <div className='ml-3 flex flex-col flex-1 gap-1.5'>
+                    <div className='h-4 w-1/3 rounded bg-gray-200 animate-pulse' />
+                    <div className='h-3 w-2/3 rounded bg-gray-100 animate-pulse' />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {!isLoading && search && results.cards.length > 0 && (
             <div className='mb-2'>
               <div className='px-2 py-1.5 text-xs font-semibold text-gray-500'>Cards</div>
@@ -197,10 +201,19 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
                 <button
                   key={`card-${card.id}`}
                   onClick={() => runCommand(() => console.log('Navigate to Card details:', card.id))}
-                  className='flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors'
+                  className='flex w-full items-center rounded-md px-2 py-2 text-left hover:bg-gray-100 transition-colors group'
                 >
-                  <SquareKanban className='mr-2 h-4 w-4 text-green-500' />
-                  <span>{card.title}</span>
+                  <div className='relative flex items-center justify-center w-4 h-4 group/checkbox cursor-pointer ml-2 shrink-0'>
+                    <Checkbox
+                      className={`peer w-full h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
+      ${checkboxColor(card.priority)}`}
+                    />
+                  </div>
+
+                  <div className='ml-3 flex flex-col flex-1 overflow-hidden'>
+                    <span className='text-sm font-medium text-gray-700 truncate'>{card.title}</span>
+                    {card.description && <span className='text-xs text-gray-400 truncate'>{card.description}</span>}
+                  </div>
                 </button>
               ))}
             </div>
