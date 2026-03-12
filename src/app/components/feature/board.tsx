@@ -26,6 +26,7 @@ interface BoardProps {
   onUpdateCard: (cardId: string, data: Partial<Card>) => Promise<void>;
   onDeleteCard: (cardId: string) => Promise<void>;
   onDeleteColumn: (columnId: string) => Promise<void>;
+  onUpdateColumn: (columnId: string, data: { title?: string; order?: number }) => Promise<void>;
 }
 
 export function Board({
@@ -35,6 +36,7 @@ export function Board({
   isLoading,
   onAddColumn,
   onDuplicateColumn,
+  onUpdateColumn,
   onUpdateCard,
   onDeleteCard,
   onDeleteColumn,
@@ -42,6 +44,9 @@ export function Board({
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
   const [creatingCardColId, setCreatingCardColId] = useState<string | null>(null);
+
+  const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
 
   const path = usePathname();
 
@@ -73,6 +78,27 @@ export function Board({
   const OpenModalDelete = (columnId: string) => {
     setColumnToDelete(columnId);
     setModalDeleteColumn(true);
+  };
+
+  const startEditingTitle = (colId: string, currentTitle: string) => {
+    setEditingColumnId(colId);
+    setEditTitle(currentTitle);
+  };
+
+  const saveColumnTitle = async (colId: string, originalTitle: string) => {
+    const trimmedTitle = editTitle.trim();
+    if (trimmedTitle && trimmedTitle !== originalTitle) {
+      await onUpdateColumn(colId, { title: trimmedTitle });
+    }
+    setEditingColumnId(null);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent, colId: string, originalTitle: string) => {
+    if (e.key === 'Enter') {
+      saveColumnTitle(colId, originalTitle);
+    } else if (e.key === 'Escape') {
+      setEditingColumnId(null);
+    }
   };
 
   const columnOptions = useMemo(
@@ -108,7 +134,24 @@ export function Board({
                 className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'
               >
                 <div className='flex items-center justify-between '>
-                  <h1 className='text-sm font-semibold text-gray-700'>{col.title}</h1>
+                  {editingColumnId === String(col.id) ? (
+                    <input
+                      autoFocus
+                      className='text-sm font-semibold text-gray-700 bg-white border border-blue-400 rounded px-2 py-0.5 outline-none w-[70%]'
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onBlur={() => saveColumnTitle(String(col.id), col.title)}
+                      onKeyDown={(e) => handleTitleKeyDown(e, String(col.id), col.title)}
+                    />
+                  ) : (
+                    <h1
+                      className='text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 px-2 py-0.5 rounded transition-colors truncate w-[70%]'
+                      onClick={() => startEditingTitle(String(col.id), col.title)}
+                      title='Click to edit'
+                    >
+                      {col.title}
+                    </h1>
+                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger className='focus:outline-0'>
                       <Ellipsis />

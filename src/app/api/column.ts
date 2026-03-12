@@ -35,6 +35,16 @@ export const duplicateColumn = async (columnId: string) => {
   }
 };
 
+export const updateColumn = async (columnId: string, data: { title?: string; order?: number }) => {
+  try {
+    const res = await api.put(`columns/${columnId}`, data);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const deleteColumn = async (columnId: string) => {
   try {
     const res = await api.delete(`columns/${columnId}`);
