@@ -13,6 +13,7 @@ function UpcomingBoardContent() {
     updateCardContext,
     deleteCardContext,
     deleteColumnContext,
+    updateColumnContext,
   } = useBoardContext();
 
   return (
@@ -26,6 +27,7 @@ function UpcomingBoardContent() {
       onUpdateCard={updateCardContext}
       onDeleteCard={deleteCardContext}
       onDeleteColumn={deleteColumnContext}
+      onUpdateColumn={updateColumnContext}
     />
   );
 }

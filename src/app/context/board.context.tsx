@@ -3,7 +3,7 @@
 
 import { Card, Column, Reminder, Section } from '@/lib/types';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { createColumn, deleteColumn, duplicateColumn, getAllColumns } from '../api/column';
+import { createColumn, deleteColumn, duplicateColumn, getAllColumns, updateColumn } from '../api/column';
 import { toast } from 'sonner';
 import {
   completeCard,
@@ -24,6 +24,7 @@ interface BoardContextType {
   fetchColumns: () => Promise<void>;
   addColumn: (title: string) => Promise<void>;
   duplicateColumnContext: (column: Column, columnId: string, order: number) => Promise<void>;
+  updateColumnContext: (columnId: string, data: { title?: string; order?: number }) => Promise<void>;
   updateCardContext: (cardId: string, data: Partial<Card>) => Promise<void>;
   addCardContext: (
     title: string,
@@ -238,6 +239,29 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     }
   };
 
+  const updateColumnContext = async (columnId: string, data: { title?: string; order?: number }) => {
+    const prev = [...columns];
+    const prevSections = [...sections];
+
+    const normalizedData = {
+      ...data,
+      order: data.order ? Number(data.order) : undefined,
+    };
+
+    setColumns((prev) => prev.map((col) => (col.id === columnId ? { ...col, ...normalizedData } : col)));
+    setSections((prev) => prev.map((sec) => (sec.id === columnId ? { ...sec, ...data } : sec)));
+
+    try {
+      await updateColumn(columnId, data);
+      toast.success('Update column successfully');
+    } catch (err) {
+      setColumns(prev);
+      setSections(prevSections);
+      console.error(err);
+      toast.error('Failed to update this column');
+    }
+  };
+
   const addCardContext = async (
     title: string,
     description: string,
@@ -405,6 +429,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
         fetchColumns,
         addColumn,
         duplicateColumnContext,
+        updateColumnContext,
         updateCardContext,
         addCardContext,
         completeCardContext,
