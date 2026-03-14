@@ -30,10 +30,22 @@ interface TaskForm {
   columnId: string;
 }
 
-interface ColumnOption {
-  id: string;
-  title: string;
-}
+const getDefaultDueDate = (colId: string) => {
+  if (colId === '2') {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (dateRegex.test(colId)) {
+    return colId;
+  }
+
+  return '';
+};
 
 interface CreateCardProps {
   currentColumnId: string;
@@ -60,12 +72,15 @@ export function CreateCard({ currentColumnId, onSuccess, open, onClose }: Create
   const priorityRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
 
+  const initialDueDate = getDefaultDueDate(currentColumnId);
+  const isDateLocked = initialDueDate !== '';
+
   const { triggerRefresh } = useRefresh();
 
   const [formData, setFormData] = useState<TaskForm>({
     title: '',
     description: '',
-    dueDate: '',
+    dueDate: initialDueDate,
     priority: '4',
     columnId: currentColumnId,
   });
@@ -184,23 +199,31 @@ export function CreateCard({ currentColumnId, onSuccess, open, onClose }: Create
           </div>
 
           <div className='flex items-center gap-2 mt-2'>
-            <div className='relative group'>
-              <input
-                type='date'
-                name='dueDate'
-                onChange={handleChange}
-                className='absolute inset-0 opacity-0 cursor-pointer w-full'
-              />
-
-              <button
-                className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium transition-colors ${
-                  formData.dueDate ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
+            {!isDateLocked ? (
+              <div className='relative group'>
+                <input
+                  type='date'
+                  name='dueDate'
+                  value={formData.dueDate}
+                  onChange={handleChange}
+                  className='absolute inset-0 opacity-0 cursor-pointer w-full'
+                />
+                <button
+                  type='button'
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium transition-colors ${
+                    formData.dueDate ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Calendar size={14} />
+                  {formData.dueDate ? new Date(formData.dueDate).toLocaleDateString() : 'Date'}
+                </button>
+              </div>
+            ) : (
+              <div className='flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 text-xs font-medium bg-gray-50 text-gray-500 cursor-not-allowed'>
                 <Calendar size={14} />
-                {formData.dueDate ? new Date(formData.dueDate).toLocaleDateString() : 'Date'}
-              </button>
-            </div>
+                {new Date(formData.dueDate).toLocaleDateString()}
+              </div>
+            )}
 
             <div className='relative' ref={priorityRef}>
               <button
