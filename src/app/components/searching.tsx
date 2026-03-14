@@ -198,7 +198,7 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
             <div className='mb-2'>
               <div className='px-2 py-1.5 text-xs font-semibold text-gray-500'>Cards</div>
               {results.cards.map((card) => (
-                <button
+                <div
                   key={`card-${card.id}`}
                   onClick={() => runCommand(() => console.log('Navigate to Card details:', card.id))}
                   className='flex w-full items-center rounded-md px-2 py-2 text-left hover:bg-gray-100 transition-colors group'
@@ -214,7 +214,7 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
                     <span className='text-sm font-medium text-gray-700 truncate'>{card.title}</span>
                     {card.description && <span className='text-xs text-gray-400 truncate'>{card.description}</span>}
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}

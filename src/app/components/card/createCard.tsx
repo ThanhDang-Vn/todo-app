@@ -37,14 +37,13 @@ interface ColumnOption {
 
 interface CreateCardProps {
   currentColumnId: string;
-  allColumns?: ColumnOption[];
   onSuccess?: () => void;
   open?: boolean;
   onClose: () => void;
   trigger?: ReactNode;
 }
 
-export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, onClose }: CreateCardProps) {
+export function CreateCard({ currentColumnId, onSuccess, open, onClose }: CreateCardProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const { sections } = useBoardContext();
   const isOpen = open ? open : internalOpen;
@@ -310,10 +309,10 @@ export function CreateCard({ currentColumnId, allColumns = [], onSuccess, open, 
                 <ChevronDown size={14} className='text-gray-400' />
               </button>
 
-              {showColumnDropdown && !open && (
+              {showColumnDropdown && (
                 <div className='absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 max-h-60 overflow-y-auto'>
                   <div className='px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider'>
-                    Select Project
+                    Select Section
                   </div>
                   {sections.map((col) => (
                     <button

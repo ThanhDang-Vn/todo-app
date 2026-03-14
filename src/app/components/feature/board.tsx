@@ -236,7 +236,6 @@ export function Board({
           open={true}
           onClose={() => setCreatingCardColId(null)}
           currentColumnId={creatingCardColId}
-          allColumns={columnOptions}
         />
       )}
 
