@@ -16,6 +16,7 @@ import {
 } from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import path from 'path';
 
 interface BoardContextType {
   columns: Column[];
@@ -270,11 +271,33 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     due_to: string,
     reminder: Reminder | undefined,
   ) => {
-    const prev = [...columns];
+    const pathname = window.location.pathname;
+
+    let columnTarget = columnId;
+
+    const dueDate = new Date(due_to);
+    const today = new Date();
+
+    const isToday =
+      dueDate.getDate() === today.getDate() &&
+      dueDate.getMonth() === today.getMonth() &&
+      dueDate.getFullYear() === today.getFullYear();
+
+    if (pathname === '/today') {
+      if (isToday) {
+        columnTarget = '2';
+      } else {
+        columnTarget = '';
+      }
+    } else if (pathname === '/upcoming') {
+      columnTarget = dueDate.toISOString().split('T')[0];
+    }
+
+    console.log(columnTarget);
 
     const tempId = (Date.now() + Math.random()).toString();
 
-    const targetColumn = columns.find((c) => c.id === columnId);
+    const targetColumn = columns.find((c) => c.id === columnTarget);
     const newOrder =
       targetColumn && targetColumn.cards && targetColumn.cards.length > 0
         ? targetColumn.cards[targetColumn.cards.length - 1].order + 10000
@@ -294,7 +317,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
 
     setColumns((prevCols) => {
       return prevCols.map((col) => {
-        if (col.id === columnId) {
+        if (col.id === columnTarget) {
           return {
             ...col,
             cards: [...(col.cards || []), optimisticCard],
