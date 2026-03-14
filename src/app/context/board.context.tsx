@@ -293,8 +293,6 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       columnTarget = dueDate.toISOString().split('T')[0];
     }
 
-    console.log(columnTarget);
-
     const tempId = (Date.now() + Math.random()).toString();
 
     const targetColumn = columns.find((c) => c.id === columnTarget);
@@ -338,7 +336,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
       });
       setColumns((prevCols) => {
         return prevCols.map((col) => {
-          if (col.id === columnId) {
+          if (col.id === columnTarget) {
             return {
               ...col,
               cards: col.cards?.map((c) => (c.id === tempId ? newRealCard : c)),
@@ -352,7 +350,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
 
       setColumns((prevCols) => {
         return prevCols.map((col) => {
-          if (col.id === columnId) {
+          if (col.id === columnTarget) {
             return {
               ...col,
               cards: col.cards?.filter((c) => c.id !== tempId),
