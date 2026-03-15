@@ -20,7 +20,6 @@ import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Reminder, ReminderOptions } from '@/lib/types';
 import { PRIORITY_OPTIONS, REMINDERS_OPTIONS } from '@/lib/constant';
 import { useBoardContext } from '@/app/context/board.context';
-import { useHandlerContext } from '@/app/context/handler.context';
 
 interface TaskForm {
   title: string;
@@ -30,18 +29,35 @@ interface TaskForm {
   columnId: string;
 }
 
+const formatDateTimeDisplay = (dateString: string) => {
+  if (!dateString) return 'Date & Time';
+  const date = new Date(dateString);
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 const getDefaultDueDate = (colId: string) => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const hours = String(today.getHours()).padStart(2, '0');
+  const minutes = String(today.getMinutes()).padStart(2, '0');
+
+  const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
   if (colId === '2') {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return currentDateTime;
   }
 
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (dateRegex.test(colId)) {
-    return colId;
+    return `${colId}T${hours}:${minutes}`;
   }
 
   return '';
@@ -71,6 +87,7 @@ export function CreateCard({ currentColumnId, onSuccess, open, onClose }: Create
 
   const priorityRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const initialDueDate = getDefaultDueDate(currentColumnId);
   const isDateLocked = initialDueDate !== '';
@@ -202,20 +219,22 @@ export function CreateCard({ currentColumnId, onSuccess, open, onClose }: Create
             {!isDateLocked ? (
               <div className='relative group'>
                 <input
-                  type='date'
+                  type='datetime-local'
                   name='dueDate'
+                  ref={dateInputRef}
                   value={formData.dueDate}
                   onChange={handleChange}
-                  className='absolute inset-0 opacity-0 cursor-pointer w-full'
+                  className='absolute w-0 h-0 opacity-0 pointer-events-none'
                 />
                 <button
                   type='button'
+                  onClick={() => dateInputRef.current?.showPicker()}
                   className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-300 text-xs font-medium transition-colors ${
                     formData.dueDate ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   <Calendar size={14} />
-                  {formData.dueDate ? new Date(formData.dueDate).toLocaleDateString() : 'Date'}
+                  {formatDateTimeDisplay(formData.dueDate)}
                 </button>
               </div>
             ) : (
