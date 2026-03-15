@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Calendar, Inbox, CalendarDays, SquareKanban, Columns3, Search, Loader2 } from 'lucide-react';
+import { Calendar, Inbox, CalendarDays, Columns3, Search } from 'lucide-react';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { searching } from '../api/searching';
 import { Checkbox } from './ui/checkbox';

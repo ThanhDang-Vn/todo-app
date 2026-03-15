@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from 'clsx';
-import { format } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -21,11 +20,3 @@ export const formatDate = (dateInput: string | Date | undefined | null): string 
     year: 'numeric',
   }).format(date);
 };
-
-const formatReminder = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "MMM d, yyyy 'at' h:mm a");
-    } catch {
-      return dateStr;
-    }
-  };

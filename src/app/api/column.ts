@@ -1,5 +1,4 @@
 import api from '@/lib/axios';
-import axios from 'axios';
 
 export const createColumn = async ({ title }: { title: string }) => {
   try {

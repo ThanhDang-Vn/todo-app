@@ -5,7 +5,6 @@ import {
   CirclePlus,
   Flag,
   Calendar,
-  MoreHorizontal,
   Inbox,
   ChevronDown,
   Check,

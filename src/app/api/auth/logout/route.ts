@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const response = await authFetch(`${BACKEND_URL}/auth/logout`, {
+    await authFetch(`${BACKEND_URL}/auth/logout`, {
       method: 'POST',
     });
   } catch (error) {

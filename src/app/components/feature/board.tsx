@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Archive, Copy, Ellipsis, PackagePlus, Trash2, Loader2, Plus } from 'lucide-react';
 import {
   DropdownMenu,

@@ -1,3 +1,4 @@
+'use client'
 import { createSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { NextRequest } from 'next/server';

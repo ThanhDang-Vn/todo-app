@@ -21,7 +21,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await getAllCompletedCard();
       setCards(data);
     } catch (err) {
-      console.error('Failed to fetch complete card');
+      console.error('Failed to fetch complete card', err);
     }
   };
 

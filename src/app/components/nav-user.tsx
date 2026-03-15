@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/app/components/ui/sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/app/components/ui/sidebar';
 import { DropdownMenuPortal } from '@radix-ui/react-dropdown-menu';
 import { useState } from 'react';
 import ProfileModal from './modal/profile-modal';

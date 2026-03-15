@@ -1,10 +1,12 @@
 'use client';
+export const dynamic = 'force-dynamic'
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
-import { Eye, EyeOff, Check, AlertCircle, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, ChevronLeft } from 'lucide-react';
 import SubmitButton from '@/app/components/ui/submitButton';
 import { resetPasswordForm } from '@/lib/auth';
+import Image from 'next/image';
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -41,7 +43,7 @@ export default function ResetPasswordPage() {
         <div className='mb-8 text-center'>
           <div className='flex justify-center items-center gap-1 mb-6'>
             <div className='p-2 rounded-xl'>
-              <img src='/logo.ico' alt='Todo Deluxe Logo' width={40} height={40} className='block' />
+              <Image src='/logo.ico' alt='Todo Deluxe Logo' width={40} height={40} className='block' />
             </div>
             <h1 className='text-2xl font-bold text-slate-900 tracking-tight'>Reset Password</h1>
           </div>

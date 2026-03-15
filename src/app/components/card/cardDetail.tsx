@@ -25,7 +25,6 @@ import {
   Plus,
   AlarmClockCheck,
   AlarmClockMinus,
-  X,
   Loader2,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -79,7 +78,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
 
     setIsSavingReminder(true);
     try {
-      const createdReminder = await createReminder(newReminderTime, card.id);
+      await createReminder(newReminderTime, card.id);
 
       const newReminderObj: Reminder = {
         remindAt: new Date(newReminderTime),
@@ -108,6 +107,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       await onUpdate(card.id, { title, description });
     } catch (error) {
       toast.error('Failed to update card');
+      console.error(error);
     } finally {
       setIsLoading(false);
       setOpen(false);
@@ -133,6 +133,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       setOpen(false);
     } catch (error) {
       toast.error('Failed to delete card');
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +145,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       toast.success(`Changed to Priority ${newPriority}`);
     } catch (error) {
       toast.error('Failed to update priority');
+      console.error(error);
     }
   };
 
@@ -153,6 +155,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
       await onUpdate(card.id, { columnId: columnId });
     } catch (err) {
       toast.error('Failed to change column');
+      console.error(err);
     }
   };
 

@@ -5,6 +5,7 @@ import SubmitButton from '@/app/components/ui/submitButton';
 import { Input } from '@/app/components/ui/input';
 import { SignUpForm } from '@/lib/auth';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Signup = () => {
   const [state, action] = React.useActionState(SignUpForm, undefined);
@@ -13,7 +14,7 @@ const Signup = () => {
       <form action={action} className='max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl'>
         <div className='text-center'>
           <div className='flex justify-center items-center gap-3 mb-2'>
-            <img src='/logo.ico' alt='Logo' className='w-10 h-10' />
+            <Image src='/logo.ico' alt='Logo' className='w-10 h-10' />
             <h1 className='text-3xl font-extrabold text-gray-900 tracking-tight'>Todo Deluxe</h1>
           </div>
           <h3 className='text-gray-500 text-sm font-medium'>Create your account to get started</h3>
