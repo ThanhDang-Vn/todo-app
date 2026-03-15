@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, User as UserIcon, Mail, Loader2, Upload, AlertCircle, Check } from 'lucide-react';
+import { X, User as UserIcon, Mail, Loader2, AlertCircle, Check } from 'lucide-react';
 import { User } from '@/lib/types';
 import { updateUserProfile, uploadAvatar } from '@/app/api/user';
 import { useUserContext } from '@/app/context/user.context';
+import Image from 'next/image';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -175,7 +176,7 @@ export default function ProfileModal({ isOpen, onClose, currentUser }: ProfileMo
               <div className='relative group'>
                 <div className='w-24 h-24 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center'>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt='Profile' className='w-full h-full object-cover' />
+                    <Image src={avatarUrl} alt='Profile' className='w-full h-full object-cover' />
                   ) : (
                     <UserIcon className='w-12 h-12 text-slate-400' />
                   )}

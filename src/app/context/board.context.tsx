@@ -16,7 +16,6 @@ import {
 } from '../api/card';
 import { CheckCircle2, Undo2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import path from 'path';
 
 interface BoardContextType {
   columns: Column[];
@@ -129,7 +128,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
   };
 
   const completeCardContext = async (cardId: string) => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       const prev = [...columns];
 
       setColumns((prevCols) =>

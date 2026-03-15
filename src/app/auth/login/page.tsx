@@ -6,6 +6,7 @@ import SubmitButton from '@/app/components/ui/submitButton';
 import { loginForm } from '@/lib/auth';
 import { GoogleLoginButton } from '@/app/components/ui/googleLoginButton';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Login = () => {
   const [state, action] = React.useActionState(loginForm, undefined);
@@ -15,7 +16,7 @@ const Login = () => {
       <div className='max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl'>
         <div className='text-center'>
           <div className='flex justify-center items-center gap-3 mb-2'>
-            <img src='/logo.ico' alt='Logo' width={40} height={40} />
+            <Image src='/logo.ico' alt='Logo' width={40} height={40} />
             <h1 className='text-3xl font-extrabold text-gray-900 tracking-tight'>Todo Deluxe</h1>
           </div>
           <h3 className='text-gray-500 text-sm font-medium'>Welcome back! Please login to your account.</h3>

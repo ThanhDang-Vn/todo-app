@@ -6,6 +6,7 @@ import SubmitButton from '@/app/components/ui/submitButton';
 
 import Link from 'next/link';
 import { forgotPasswordForm } from '@/lib/auth';
+import Image from 'next/image';
 
 const ForgotPassword = () => {
   const [state, action] = React.useActionState(forgotPasswordForm, undefined);
@@ -15,7 +16,7 @@ const ForgotPassword = () => {
       <div className='max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl'>
         <div className='text-center'>
           <div className='flex justify-center items-center gap-3 mb-2'>
-            <img src='/logo.ico' alt='Logo' width={40} height={40} />
+            <Image src='/logo.ico' alt='Logo' width={40} height={40} />
             <h1 className='text-3xl font-extrabold text-gray-900 tracking-tight'>Todo Deluxe</h1>
           </div>
           <h3 className='text-gray-900 text-xl font-bold mt-4'>Forgot Password?</h3>

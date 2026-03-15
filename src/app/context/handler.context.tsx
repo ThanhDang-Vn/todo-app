@@ -190,7 +190,6 @@ export const HandlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     due_to: string,
     reminder: Reminder | undefined,
   ) => {
-    const prev = [...columns];
 
     const tempId = (Date.now() + Math.random()).toString();
 

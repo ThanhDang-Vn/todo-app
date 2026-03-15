@@ -1,6 +1,7 @@
 'use  client';
 import { PropsWithChildren } from 'react';
 import { BACKEND_URL } from '@/lib/constant';
+import Image from 'next/image';
 
 export function GoogleLoginButton({ children }: PropsWithChildren) {
   return (
@@ -9,7 +10,7 @@ export function GoogleLoginButton({ children }: PropsWithChildren) {
       active:scale-95 w-100 h-9 px-4 py-2'
       href={`${BACKEND_URL}/auth/google/login`}
     >
-      <img src={'/google-icon.png'} width={20} height={20} />
+      <Image alt='' src={'/google-icon.png'} width={20} height={20} />
       {children}
     </a>
   );
