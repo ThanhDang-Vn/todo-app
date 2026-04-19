@@ -26,7 +26,10 @@ import {
   AlarmClockCheck,
   AlarmClockMinus,
   Loader2,
+  GripVertical,
 } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { createReminder } from '@/app/api/reminder';
@@ -55,7 +58,22 @@ interface CardItemProps {
   onDelete: (cardId: string) => Promise<void>;
 }
 
+const priorityBorder = (priority: string) => {
+  switch (priority) {
+    case '1': return 'border-l-red-400';
+    case '2': return 'border-l-orange-400';
+    case '3': return 'border-l-blue-400';
+    default:  return 'border-l-gray-200';
+  }
+};
+
 export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: card.id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description || '');
@@ -162,39 +180,60 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === card.priority) || PRIORITY_OPTIONS[3];
 
   return (
+    <div ref={setNodeRef} style={style} {...attributes} className='relative'>
+      {/* Drop indicator line */}
+      {isOver && !isDragging && (
+        <div className='absolute -top-1.5 left-0 right-0 h-0.5 bg-blue-400 rounded-full z-10 shadow-[0_0_6px_1px_rgba(96,165,250,0.6)]' />
+      )}
+
+      {/* Dragging placeholder */}
+      {isDragging ? (
+        <div className='w-full rounded-xl border-2 border-dashed border-blue-300 bg-blue-50/60 min-h-[68px]' />
+      ) : (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className='group relative w-full bg-white border border-gray-200 rounded-xl p-3.5 transition-all duration-200 ease-in-out hover:border-gray-300 hover:shadow-sm cursor-pointer text-left'>
-          <div className='flex items-start gap-3.5'>
+        <div className={`group relative w-full bg-white border border-gray-200 border-l-[3px] ${priorityBorder(card.priority)} rounded-xl p-3 transition-all duration-150 ease-in-out hover:border-gray-300 hover:shadow-md hover:-translate-y-px cursor-pointer text-left`}>
+          <div className='flex items-start gap-2'>
+
+            <div
+              {...listeners}
+              onClick={(e) => e.stopPropagation()}
+              className='flex-shrink-0 mt-[3px] cursor-grab active:cursor-grabbing text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity touch-none'
+            >
+              <GripVertical size={13} />
+            </div>
+
+            {/* Checkbox */}
             <div
               onClick={(e) => {
                 e.stopPropagation();
                 handleCompleteCard(card.id);
               }}
-              className='relative flex items-center justify-center w-4 h-4 group/checkbox cursor-pointer'
+              className='relative flex items-center justify-center w-4 h-4 group/checkbox cursor-pointer flex-shrink-0 mt-[2px]'
             >
               <Checkbox
-                className={`peer w-full h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 
-                ${checkboxColor(card.priority)}`}
+                className={`peer w-full h-full transition-all duration-300 ease-out data-[state=checked]:scale-115 ${checkboxColor(card.priority)}`}
               />
               <Check
-                size={14}
+                size={11}
                 strokeWidth={3}
                 className='absolute text-gray-400 opacity-0 group-hover/checkbox:opacity-100 pointer-events-none transition-all duration-200 peer-data-[state=checked]:hidden'
               />
             </div>
-            <div className='flex flex-col flex-1 min-w-0 gap-1.5'>
-              <div className='space-y-0.5'>
-                <h3 className='text-sm font-medium text-gray-900 leading-tight truncate'>{card.title}</h3>
-                {card.description && (
-                  <p className='text-xs text-gray-500 line-clamp-2 font-normal leading-relaxed'>{card.description}</p>
-                )}
-              </div>
-              <div className='flex items-center gap-2 mt-1'>
-                <div className='flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors bg-gray-50 text-gray-500 group-hover:bg-gray-100'>
-                  <CalendarArrowUp size={13} className='opacity-70' />
+            <div className='flex flex-col flex-1 min-w-0 gap-1'>
+              <h3 className='text-sm font-medium text-gray-800 leading-snug truncate'>{card.title}</h3>
+              {card.description && (
+                <p className='text-[11px] text-gray-400 line-clamp-2 leading-relaxed'>{card.description}</p>
+              )}
+              <div className='flex items-center justify-between mt-1'>
+                <div className='flex items-center gap-1 text-[11px] font-medium text-gray-400 group-hover:text-gray-500 transition-colors'>
+                  <CalendarArrowUp size={11} className='flex-shrink-0' />
                   <span>{formatDate(card.dueTo)}</span>
                 </div>
+                <Flag
+                  size={11}
+                  className={`flex-shrink-0 ${currentPriority.color} ${currentPriority.fill} opacity-60 group-hover:opacity-100 transition-opacity`}
+                />
               </div>
             </div>
           </div>
@@ -414,5 +453,7 @@ export function CardItem({ card, column, allColumns, onUpdate, onDelete }: CardI
         </div>
       </DialogContent>
     </Dialog>
+      )}
+    </div>
   );
 }

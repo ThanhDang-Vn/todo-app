@@ -1,6 +1,5 @@
 'use client';
 
-// Thêm useState vào import
 import { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';

@@ -10,6 +10,7 @@ function InboxBoardContent() {
     addColumn,
     duplicateColumnContext,
     updateCardContext,
+    reorderCardContext,
     deleteCardContext,
     deleteColumnContext,
     updateColumnContext,
@@ -24,6 +25,7 @@ function InboxBoardContent() {
       onAddColumn={addColumn}
       onDuplicateColumn={duplicateColumnContext}
       onUpdateCard={updateCardContext}
+      onReorderCard={reorderCardContext}
       onDeleteCard={deleteCardContext}
       onDeleteColumn={deleteColumnContext}
       onUpdateColumn={updateColumnContext}
