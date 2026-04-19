@@ -14,6 +14,18 @@ import { CreateColumn } from '../column/createColumn';
 import { CreateCard } from '../card/createCard';
 import ConfirmModal from '../modal/confirm';
 import { usePathname } from 'next/navigation';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 interface BoardProps {
   title: string;
@@ -26,6 +38,7 @@ interface BoardProps {
   onDeleteCard: (cardId: string) => Promise<void>;
   onDeleteColumn: (columnId: string) => Promise<void>;
   onUpdateColumn: (columnId: string, data: { title?: string; order?: number }) => Promise<void>;
+  onReorderCard: (cardId: string, sourceColumnId: string, destColumnId: string, destIndex: number) => Promise<void>;
 }
 
 export function Board({
@@ -39,6 +52,7 @@ export function Board({
   onUpdateCard,
   onDeleteCard,
   onDeleteColumn,
+  onReorderCard,
 }: BoardProps) {
   const [modalDeleteColumn, setModalDeleteColumn] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
@@ -47,7 +61,60 @@ export function Board({
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
+
   const path = usePathname();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const findColumnByCardId = (cardId: string): Column | undefined =>
+    columns.find((col) => col.cards?.some((c) => c.id === cardId));
+
+  const onDragStart = (event: DragStartEvent) => {
+    const col = findColumnByCardId(String(event.active.id));
+    const card = col?.cards?.find((c) => c.id === event.active.id);
+    setActiveCard(card ?? null);
+  };
+
+  const onDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    // Only allow cross-column drag on inbox
+    if (path !== '/inbox') return;
+
+    const sourceCol = findColumnByCardId(String(active.id));
+    const destCol = findColumnByCardId(String(over.id)) ?? columns.find((c) => c.id === over.id);
+    if (!sourceCol || !destCol || sourceCol.id === destCol.id) return;
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveCard(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const sourceCol = findColumnByCardId(String(active.id));
+    if (!sourceCol) return;
+
+    // Determine destination column: over a card → find its column; over a column id → use it
+    const destColByCard = findColumnByCardId(String(over.id));
+    const destColById = columns.find((c) => c.id === over.id);
+    const destCol = destColByCard ?? destColById;
+    if (!destCol) return;
+
+    const isCrossColumn = sourceCol.id !== destCol.id;
+
+    // Block cross-column drag outside of inbox
+    if (isCrossColumn && path !== '/inbox') return;
+
+    const destCards = (destCol.cards || []).filter((c) => c.id !== active.id);
+    const overCardIndex = destCards.findIndex((c) => c.id === over.id);
+    const destIndex = overCardIndex === -1 ? destCards.length : overCardIndex;
+
+    onReorderCard(String(active.id), sourceCol.id, destCol.id, destIndex);
+  };
 
   const handleDuplicateColumn = async (column: Column, columnId: string, order: number) => {
     await onDuplicateColumn(column, columnId, order);
@@ -123,111 +190,137 @@ export function Board({
           <Loader2 className='h-12 w-12 animate-spin text-red-400' />
         </div>
       ) : (
-        <div className='overflow-x-auto h-full custom-scrollbar'>
-          <div className='flex gap-5 px-1 py-4'>
-            <div className='px-1 flex justify-start gap-5'>
-              {columns.map((col: Column) => (
-                <div
-                  key={`col-${col.id}-${Date.now()}`}
-                  className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'
-                >
-                  <div className='flex items-center justify-between '>
-                    {editingColumnId === String(col.id) ? (
-                      <input
-                        autoFocus
-                        className='text-sm font-semibold text-gray-700 bg-white border border-blue-400 rounded px-2 py-0.5 outline-none w-[70%]'
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        onBlur={() => saveColumnTitle(String(col.id), col.title)}
-                        onKeyDown={(e) => handleTitleKeyDown(e, String(col.id), col.title)}
-                      />
-                    ) : (
-                      <h1
-                        className='text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 px-2 py-0.5 rounded transition-colors truncate w-[70%]'
-                        onClick={() => startEditingTitle(String(col.id), col.title)}
-                        title='Click to edit'
-                      >
-                        {col.title}
-                      </h1>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className='focus:outline-0'>
-                        <Ellipsis />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className='w-40 border-0 bg-white' align='center'>
-                        <DropdownMenuLabel></DropdownMenuLabel>
-                        <DropdownMenuGroup className=''>
-                          <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.id))}>
-                            <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
-                              <PackagePlus size={17} />
-                              <div className='text-sm font-sans'>Add Card</div>
-                            </div>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem onSelect={() => handleDuplicateColumn(col, col.id, col.order!)}>
-                            <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
-                              <Copy size={17} />
-                              <div className='text-sm font-sans'>Duplicate</div>
-                            </div>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem>
-                            <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
-                              <Archive size={17} />
-                              <div className='text-sm font-sans'>Archive</div>
-                            </div>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem onSelect={() => OpenModalDelete(col.id)}>
-                            <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
-                              <Trash2 size={17} />
-                              <div className='text-sm font-sans '>Delete</div>
-                            </div>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className='flex-1 overflow-y-auto max-h-142 pr-3 space-y-3 pb-2 custom-scrollbar'>
-                    {col?.cards && col.cards.length > 0 ? (
-                      col.cards.map((c: Card) => (
-                        <CardItem
-                          key={c.id}
-                          card={c}
-                          column={col}
-                          allColumns={columnOptions}
-                          onUpdate={handleUpdateCard}
-                          onDelete={handleDeleteCard}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
+        >
+          <div className='overflow-x-auto h-full custom-scrollbar'>
+            <div className='flex gap-5 px-1 py-4'>
+              <div className='px-1 flex justify-start gap-5'>
+                {columns.map((col: Column) => (
+                  <div
+                    key={col.id}
+                    className='flex flex-col flex-shrink-0 gap-4 w-[18rem] max-h-full'
+                  >
+                    <div className='flex items-center justify-between '>
+                      {editingColumnId === String(col.id) ? (
+                        <input
+                          autoFocus
+                          className='text-sm font-semibold text-gray-700 bg-white border border-blue-400 rounded px-2 py-0.5 outline-none w-[70%]'
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          onBlur={() => saveColumnTitle(String(col.id), col.title)}
+                          onKeyDown={(e) => handleTitleKeyDown(e, String(col.id), col.title)}
                         />
-                      ))
-                    ) : (
-                      <button
-                        onClick={() => setCreatingCardColId(String(col.id))}
-                        className='w-full h-12 border-1 border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-in-out group shadow-sm'
-                      >
-                        <div className='flex items-center justify-center gap-2'>
-                          <div className='p-1 bg-white rounded-full border border-gray-100 shadow-sm group-hover:shadow transition-all'>
-                            <Plus size={15} />
-                          </div>
-                          <span className='text-sm font-medium'>Add new card</span>
-                        </div>
-                      </button>
-                    )}
+                      ) : (
+                        <h1
+                          className='text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-200 px-2 py-0.5 rounded transition-colors truncate w-[70%]'
+                          onClick={() => startEditingTitle(String(col.id), col.title)}
+                          title='Click to edit'
+                        >
+                          {col.title}
+                        </h1>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className='focus:outline-0'>
+                          <Ellipsis />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className='w-40 border-0 bg-white' align='center'>
+                          <DropdownMenuLabel></DropdownMenuLabel>
+                          <DropdownMenuGroup className=''>
+                            <DropdownMenuItem onSelect={() => setCreatingCardColId(String(col.id))}>
+                              <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                                <PackagePlus size={17} />
+                                <div className='text-sm font-sans'>Add Card</div>
+                              </div>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem onSelect={() => handleDuplicateColumn(col, col.id, col.order!)}>
+                              <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                                <Copy size={17} />
+                                <div className='text-sm font-sans'>Duplicate</div>
+                              </div>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem>
+                              <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] pr-10'>
+                                <Archive size={17} />
+                                <div className='text-sm font-sans'>Archive</div>
+                              </div>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem onSelect={() => OpenModalDelete(col.id)}>
+                              <div className='px-2 py-1 flex items-center gap-3 mb-1 rounded-md text-gray-600 cursor-pointer transition-all duration-200 ease-out hover:bg-red-50 hover:text-red-600 active:scale-[0.98] pr-10'>
+                                <Trash2 size={17} />
+                                <div className='text-sm font-sans '>Delete</div>
+                              </div>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <SortableContext
+                      items={(col.cards || []).map((c) => c.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className='flex-1 overflow-y-auto max-h-142 pr-3 space-y-3 pb-2 custom-scrollbar'>
+                        {col?.cards && col.cards.length > 0 ? (
+                          col.cards.map((c: Card) => (
+                            <CardItem
+                              key={c.id}
+                              card={c}
+                              column={col}
+                              allColumns={columnOptions}
+                              onUpdate={handleUpdateCard}
+                              onDelete={handleDeleteCard}
+                            />
+                          ))
+                        ) : (
+                          <button
+                            onClick={() => setCreatingCardColId(String(col.id))}
+                            className='w-full h-12 border-1 border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-in-out group shadow-sm'
+                          >
+                            <div className='flex items-center justify-center gap-2'>
+                              <div className='p-1 bg-white rounded-full border border-gray-100 shadow-sm group-hover:shadow transition-all'>
+                                <Plus size={15} />
+                              </div>
+                              <span className='text-sm font-medium'>Add new card</span>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    </SortableContext>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {path === '/inbox' && !isLoading && (
-                <div className='w-[15rem] flex-shrink-0 pr-10'>
-                  <CreateColumn onCreate={handleCreateColumn} />
-                </div>
-              )}
+                {path === '/inbox' && !isLoading && (
+                  <div className='w-[15rem] flex-shrink-0 pr-10'>
+                    <CreateColumn onCreate={handleCreateColumn} />
+                  </div>
+                )}
 
-              <div className='flex flex-col gap-4 w-[18rem]' />
+                <div className='flex flex-col gap-4 w-[18rem]' />
+              </div>
             </div>
           </div>
-        </div>
+
+          <DragOverlay>
+            {activeCard ? (
+              <div className='bg-white border border-blue-300 rounded-xl p-3.5 shadow-lg w-[18rem] opacity-95 rotate-1'>
+                <div className='flex flex-col gap-1.5'>
+                  <h3 className='text-sm font-medium text-gray-900 leading-tight truncate'>{activeCard.title}</h3>
+                  {activeCard.description && (
+                    <p className='text-xs text-gray-500 line-clamp-2 font-normal'>{activeCard.description}</p>
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {creatingCardColId && (

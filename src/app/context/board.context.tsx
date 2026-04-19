@@ -26,6 +26,7 @@ interface BoardContextType {
   duplicateColumnContext: (column: Column, columnId: string, order: number) => Promise<void>;
   updateColumnContext: (columnId: string, data: { title?: string; order?: number }) => Promise<void>;
   updateCardContext: (cardId: string, data: Partial<Card>) => Promise<void>;
+  reorderCardContext: (cardId: string, sourceColumnId: string, destColumnId: string, destIndex: number) => Promise<void>;
   addCardContext: (
     title: string,
     description: string,
@@ -421,6 +422,75 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
     }
   };
 
+  const reorderCardContext = async (
+    cardId: string,
+    sourceColumnId: string,
+    destColumnId: string,
+    destIndex: number,
+  ) => {
+    const previousColumns = [...columns];
+
+    let newOrder = 10000;
+
+    setColumns((prevCols) => {
+      const destCol = prevCols.find((c) => c.id === destColumnId);
+      const destCards = (destCol?.cards || []).filter((c) => c.id !== cardId);
+
+      if (destCards.length === 0) {
+        newOrder = 10000;
+      } else if (destIndex <= 0) {
+        newOrder = Math.floor(destCards[0].order / 2) || 5000;
+      } else if (destIndex >= destCards.length) {
+        newOrder = destCards[destCards.length - 1].order + 10000;
+      } else {
+        newOrder = Math.floor((destCards[destIndex - 1].order + destCards[destIndex].order) / 2);
+      }
+
+      const isSameColumn = sourceColumnId === destColumnId;
+
+      let cardToMove: Card | undefined;
+      for (const col of prevCols) {
+        const found = col.cards?.find((c) => c.id === cardId);
+        if (found) {
+          cardToMove = { ...found, order: newOrder, columnId: destColumnId };
+          break;
+        }
+      }
+      if (!cardToMove) return prevCols;
+
+      return prevCols.map((col) => {
+        if (isSameColumn && col.id === sourceColumnId) {
+          const without = (col.cards || []).filter((c) => c.id !== cardId);
+          const inserted = [...without.slice(0, destIndex), cardToMove!, ...without.slice(destIndex)];
+          return { ...col, cards: inserted };
+        }
+        if (!isSameColumn) {
+          if (col.id === sourceColumnId) {
+            return { ...col, cards: (col.cards || []).filter((c) => c.id !== cardId) };
+          }
+          if (col.id === destColumnId) {
+            const without = (col.cards || []).filter((c) => c.id !== cardId);
+            const inserted = [...without.slice(0, destIndex), cardToMove!, ...without.slice(destIndex)];
+            return { ...col, cards: inserted };
+          }
+        }
+        return col;
+      });
+    });
+
+    try {
+      const updateData: Partial<Card> = { order: newOrder };
+      if (sourceColumnId !== destColumnId) {
+        updateData.columnId = destColumnId;
+      }
+      await updateCard(cardId, updateData);
+    } catch (err) {
+      console.error(err);
+      setColumns(previousColumns);
+      toast.error('Failed to move card');
+    }
+  };
+
   const deleteCardContext = async (cardId: string) => {
     const previousColumns = [...columns];
 
@@ -451,6 +521,7 @@ export const BoardProvider: React.FC<BoardProviderProps> = ({ children }) => {
         duplicateColumnContext,
         updateColumnContext,
         updateCardContext,
+        reorderCardContext,
         addCardContext,
         completeCardContext,
         deleteCardContext,
